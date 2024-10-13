@@ -165,13 +165,7 @@ This gives you the ability to create truly conditional cases in your workflows, 
 
 # 📺 Examples
 
-https://user-images.githubusercontent.com/800903/262439441-bb9d888a-d33e-4246-9f0a-1ddeac062d35.mp4
-
-https://user-images.githubusercontent.com/800903/262442794-61b1e32f-3f87-4b36-98d6-f711822bdb1e.mp4
-
-https://user-images.githubusercontent.com/800903/262449305-901086a3-22cb-42d2-b5be-a5f38db4549a.mp4
-
-https://user-images.githubusercontent.com/800903/267808494-300f8cc3-9136-4810-86e2-92f2114a5f9a.mp4
+Coming soon
 
 # 😎 Contributing
 
