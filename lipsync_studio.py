@@ -175,17 +175,42 @@ class WorkflowLipSync:
             quality,  # Literal['Low', 'Medium', 'High', 'Best']  in 'Video Quality' Radio component
             api_name="/set_video_quality"
         )
-        faceswap_video = None
-        if faceswap_image is not None:
-            result = client.predict(
-                api_name="/generate_faceswap"
+        for id_speaker in range(face_id):
+            client.predict(
+                str(id_speaker),  # Literal[]  in 'Face Id' Dropdown component
+                False,  # bool  in 'Show wav2lip Output' Checkbox component
+                api_name="/set_face_id"
             )
-            faceswap_video = result["value"]["video"]
+            client.predict(
+                False,  # bool  in 'Speaker' Checkbox component
+                api_name="/set_speaker"
+            )
+            if faceswap_image is not None:
+                client.predict(
+                    "None",  # Literal[]  in 'Face swap id' Radio component
+                    api_name="/set_faceswap"
+                )
+
         client.predict(
-            face_id,  # Literal[]  in 'Face Id' Dropdown component
+            str(face_id),  # Literal[]  in 'Face Id' Dropdown component
             False,  # bool  in 'Show wav2lip Output' Checkbox component
             api_name="/set_face_id"
         )
+
+        client.predict(
+            True,  # bool  in 'Speaker' Checkbox component
+            api_name="/set_speaker"
+        )
+
+        if faceswap_image is not None:
+            client.predict(
+                "0",  # Literal[]  in 'Face swap id' Radio component
+                api_name="/set_faceswap"
+            )
+            client.predict(
+                api_name="/generate_faceswap"
+            )
+
         client.predict(
             True,  # bool  in 'Stop video' Checkbox component
             api_name="/set_stop_video"
