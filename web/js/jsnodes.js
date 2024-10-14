@@ -583,8 +583,8 @@ app.registerExtension({
                                     //console.log('Workflow:', workflow);
                                     if (data.error == "none"){
                                         const combo = this.widgets.find(w => w.name === "workflows");
-                                        combo["values"] += data.file_name;
-                                        combo["value"] = data.file_name;
+                                        combo.options.values.push(data.file_name);
+                                        combo.value = data.file_name;
                                         importWorkflow(this, data.file_name, app)
                                     }else{
                                         alert(data.error)
