@@ -17,7 +17,6 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 * [🚀 Updates](#-updates)
 * [💻 Installation](#-installation)
 * [🕸️ Nodes](#-nodes)
-* [📺 Tutorial](#-tutorial)
 * [🐍 Usage](#-usage)
 * [💪 Special things to know](#-special-things-to-know)
 * [📺 Examples](#-examples)
@@ -68,9 +67,6 @@ After this command be created folder Comfyui-FlowChain
 | <img src="docs/assets/Continue.png" width="100%"> | _Workflow Continue_ |                                 Node to stop/Continue the workflow process.                                  |   FlowChain ⛓️   |
 | <img src="docs/assets/lipsync.png" width="100%">  | _Workflow Lipsync_  |                                   Extra Node to use LipSync Studio via API                                   |   FlowChain ⛓️   |
 
-
-## 📺 Tutorial
-- [Here](https://youtu.be/B84A5alpPDc)
 
 # 🐍 Usage
 
