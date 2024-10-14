@@ -583,7 +583,16 @@ app.registerExtension({
                                     //console.log('Workflow:', workflow);
                                     if (data.error == "none"){
                                         const combo = this.widgets.find(w => w.name === "workflows");
-                                        combo.options.values.push(data.file_name);
+                                        if(combo.options.values.includes("No file in worflows/api folder")){
+                                            //remove a values from combo.options.values
+                                            const index = combo.options.values.indexOf("No file in worflows/api folder");
+                                            if (index > -1) {
+                                                combo.options.values.splice(index, 1);
+                                            }
+                                        }
+                                        if (!combo.options.values.includes(data.file_name)){
+                                            combo.options.values.push(data.file_name);
+                                        }
                                         const nodes_input = Object.fromEntries(
                                             Object.entries(workflow).filter(([k, v]) => v.class_type == "WorkflowInput")
                                         );
@@ -591,7 +600,13 @@ app.registerExtension({
                                         const nodes_output = Object.fromEntries(
                                             Object.entries(workflow).filter(([k, v]) => v.class_type == "WorkflowOutput")
                                         );
-
+                                        //remove a values from app.lipsync_studio
+                                        if (data.file_name in app.lipsync_studio){
+                                            delete app.lipsync_studio[data.file_name];
+                                        }
+                                        if ("No file in worflows/api folder" in app.lipsync_studio){
+                                            delete app.lipsync_studio["No file in worflows/api folder"];
+                                        }
                                         app.lipsync_studio[data.file_name] = {inputs: nodes_input, outputs: nodes_output};
                                         combo.value = data.file_name;
                                         importWorkflow(this, data.file_name, app)

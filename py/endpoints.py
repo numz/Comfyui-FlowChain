@@ -55,7 +55,8 @@ async def workflow(request):
     else:
         file_name = json_path[-1]
         json_path = folder_paths.user_directory + "/" + user + "/workflows/api/" + file_name
-        shutil.copy(original_path, json_path)
+        if os.path.exists(original_path):
+            shutil.copy(original_path, json_path)
     if os.path.exists(json_path):
         with open(json_path, "r", encoding="utf-8") as f:
             json_content = json.load(f)
