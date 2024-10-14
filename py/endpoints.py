@@ -38,7 +38,8 @@ async def workflows(request):
     else:
         os.makedirs(json_path)
         result["No file in worflows/api folder"] = {"inputs": {}, "outputs": {}}
-
+    if result == {}:
+        result["No file in worflows/api folder"] = {"inputs": {}, "outputs": {}}
     return web.json_response(result, content_type='application/json')
 
 
