@@ -584,6 +584,15 @@ app.registerExtension({
                                     if (data.error == "none"){
                                         const combo = this.widgets.find(w => w.name === "workflows");
                                         combo.options.values.push(data.file_name);
+                                        const nodes_input = Object.fromEntries(
+                                            Object.entries(workflow).filter(([k, v]) => v.class_type == "WorkflowInput")
+                                        );
+
+                                        const nodes_output = Object.fromEntries(
+                                            Object.entries(workflow).filter(([k, v]) => v.class_type == "WorkflowOutput")
+                                        );
+
+                                        app.lipsync_studio[data.file_name] = {inputs: nodes_input, outputs: nodes_output};
                                         combo.value = data.file_name;
                                         importWorkflow(this, data.file_name, app)
                                     }else{
