@@ -14,6 +14,7 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 <img src="docs/assets/allnodes.png" width="100%">
 
 ## 📖 Quick Index
+* [🤔 Why, when the 'convert to group node' option already exists?](#-why-when-the-convert-to-group-node-option-already-exists)
 * [🚀 Updates](#-updates)
 * [🔗 requirements](#-requirements)
 * [💻 Installation](#-installation)
@@ -26,6 +27,15 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 * [📜 License](#-license)
 * [☕ Support](#-support)
 
+## 🤔 Why, when the 'convert to group node' option already exists?
+The idea came from the frustration users experienced with the many limitations and bugs in ComfyUI’s group nodes. While group nodes can seem useful for organizing nodes hierarchically, their actual use often leads to issues. Here are some of the major flaws I aimed to address:
+ - **Instability with primitive nodes**: Primitive nodes are often dropped when grouped, making them ineffective in complex workflows.
+ - **Issues with dynamic nodes**: Dynamic nodes, such as those with switches or conditional behaviors, tend to lose connections when grouped.
+ - **Incompatibility with ControlNet**: When integrating ControlNet nodes into group nodes, the order of inputs and outputs is crucial to avoid reversing results. 
+ - **Complex node maintenance**: Managing nodes in ComfyUI can quickly become overwhelming, especially when you need to modify the same function multiple times. 
+
+By solving these problems, my tool makes node management more intuitive, stable, and efficient, allowing you to focus on what matters: creating.
+
 ## 🚀 Updates
 **2024.11.01 Initial version features :**
 - 💪 Convert your workflows into nodes
@@ -34,10 +44,15 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 
 ## 🔗 requirements
 
-- **comfyui**: Be sure to have a ComfyUI front-end version of at least 1.3.11. If not, update ComfyUI to the latest version. To find the front-end version, go to ComfyUI settings (the gear icon), click "About," and check the version at the top of the page.
+- **comfyui**: Be sure to have a **ComfyUI front-end** version of at least **1.3.11**. If not, update ComfyUI to the latest version. To find the front-end version, go to ComfyUI settings (the gear icon), click "About," and check the version at the top of the page.
 
 ## 💻 Installation
 
+### Method 1: Automatic Installation
+1. Go to the **ComfyUI Manager** and click **Custom Nodes Manager**.
+2. search for **FlowChain** and click **Install**.
+
+### Method 2: Manual Installation
 1. Install [Git](https://git-scm.com/)
 2. Go to folder ..\ComfyUI\custom_nodes
 3. Run cmd.exe
