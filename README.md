@@ -15,6 +15,7 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 
 ## 📖 Quick Index
 * [🚀 Updates](#-updates)
+* [🔗 requirements](#-requirements)
 * [💻 Installation](#-installation)
 * [🕸️ Nodes](#-nodes)
 * [🐍 Usage](#-usage)
@@ -30,6 +31,11 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 - 💪 Convert your workflows into nodes
 - ⛓️ Chain your workflow
 - 👄 Extra Node that use [LipSync Studio v0.6](https://www.patreon.com/Wav2LipStudio)
+
+## 🔗 requirements
+
+- comfyui: be sur to have a comfyui front end version at least 1.3.11, if not update comfyui to the latest version.
+to find the front end version go to comfyui settings (the gear icon), click "About" and check the version at the top of the page.
 
 ## 💻 Installation
 
