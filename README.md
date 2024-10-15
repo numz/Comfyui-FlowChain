@@ -34,8 +34,7 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 
 ## 🔗 requirements
 
-- comfyui: be sur to have a comfyui front end version at least 1.3.11, if not update comfyui to the latest version.
-to find the front end version go to comfyui settings (the gear icon), click "About" and check the version at the top of the page.
+- **comfyui**: Be sure to have a ComfyUI front-end version of at least 1.3.11. If not, update ComfyUI to the latest version. To find the front-end version, go to ComfyUI settings (the gear icon), click "About," and check the version at the top of the page.
 
 ## 💻 Installation
 
