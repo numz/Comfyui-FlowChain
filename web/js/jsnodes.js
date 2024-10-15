@@ -490,7 +490,6 @@ app.registerExtension({
 		switch (nodeData.name) {
 			case "Workflow":
 				nodeType.prototype.onNodeCreated =  function() {
-
                     chainCallback(this, "onConfigure", function(info) {
                         let widgetDict = info.widgets_values
                         if (info.widgets_values.length == undefined) {
@@ -524,6 +523,7 @@ app.registerExtension({
                                                     widget.last_y = info.widgets_values[key].last_y;
                                                     widget.origSerializeValue = nodeType.prototype.serializeValue;
                                                     widget.value = info.widgets_values[key].value;
+                                                    widget.computeSize = () => [0, -4]; // -4 is due to the gap litegraph adds between widgets automatically
                                                     break;
                                                 }
                                             }
@@ -532,11 +532,12 @@ app.registerExtension({
                                 }
                             }
                         }
-                        for(let i = this.outputs.length - 1; i>0; i--){
+                        this.outputs = info.outputs_values;
+                        /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
                             }
-                        }
+                        }*/
                     });
                     chainCallback(this, "onSerialize", function(info) {
                         let inps = {};
@@ -552,7 +553,7 @@ app.registerExtension({
                         for (let w of this.widgets) {
                             info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type, origType: w.origType, last_y: w.last_y};
                         }
-
+                        info.outputs_values = this.outputs;
                         for (let w of this.inputs){
                             for (let [key, value] of Object.entries(inps)){
                                 if (value.inputs.Name == w.name){
@@ -583,13 +584,6 @@ app.registerExtension({
                                     //console.log('Workflow:', workflow);
                                     if (data.error == "none"){
                                         const combo = this.widgets.find(w => w.name === "workflows");
-                                        if(combo.options.values.includes("No file in worflows/api folder")){
-                                            //remove a values from combo.options.values
-                                            const index = combo.options.values.indexOf("No file in worflows/api folder");
-                                            if (index > -1) {
-                                                combo.options.values.splice(index, 1);
-                                            }
-                                        }
                                         if (!combo.options.values.includes(data.file_name)){
                                             combo.options.values.push(data.file_name);
                                         }
@@ -647,6 +641,7 @@ app.registerExtension({
                                     w.value = widgetDict[w.name].value;
                                 }
                             }
+
                             // check if widgetDict in this.widgets
                             for (let [key, value] of Object.entries(widgetDict)) {
                                 let widget = this.widgets.find(w => w.name === key);
@@ -668,6 +663,8 @@ app.registerExtension({
                                             widget.origComputeSize = undefined;
                                             widget.last_y = info.widgets_values[key].last_y;
                                             widget.origSerializeValue = nodeType.prototype.serializeValue;
+                                            widget.computeSize = () => [0, -4];
+
                                         }else{
                                             this.removeInput(this.inputs.indexOf(input));
                                         }
@@ -676,11 +673,19 @@ app.registerExtension({
                             }
 
                         }
-                        for(let i = this.outputs.length - 1; i>0; i--){
+                        // get inputs by name
+                        for (let w of this.inputs){
+                            if (w.name=="default"){
+                                w.type = info.widgets_values.type.value;
+                            }
+                        }
+                        this.outputs = info.outputs_values;
+
+                        /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
                             }
-                        }
+                        }*/
                     });
                     chainCallback(this, "onSerialize", function(info) {
                         info.widgets_values = {};
@@ -703,7 +708,7 @@ app.registerExtension({
                                 }
                             }
                         }
-
+                        info.outputs_values = this.outputs;
                     });
 
                     this.widgets[1].callback =  ( value ) => {
@@ -810,6 +815,7 @@ app.registerExtension({
                                             widget.origComputeSize = undefined;
                                             widget.last_y = info.widgets_values[key].last_y;
                                             widget.origSerializeValue = nodeType.prototype.serializeValue;
+                                            widget.computeSize = () => [0, -4];
                                         }else{
                                             this.removeInput(this.inputs.indexOf(input));
                                         }
@@ -818,11 +824,13 @@ app.registerExtension({
                             }
 
                         }
-                        for(let i = this.outputs.length - 1; i>0; i--){
+
+                        this.outputs = info.outputs_values;
+                        /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
                             }
-                        }
+                        }*/
                     });
                     chainCallback(this, "onSerialize", function(info) {
                         info.widgets_values = {};
@@ -845,7 +853,12 @@ app.registerExtension({
                                 }
                             }
                         }
-
+                        for (let w of this.inputs){
+                            if (w.name=="input"){
+                                w.type = info.widgets_values.type.value;
+                            }
+                        }
+                        info.outputs_values = this.outputs;
                     });
 
                     this.widgets[0].callback =  ( value ) => {
@@ -899,6 +912,7 @@ app.registerExtension({
                                             widget.origComputeSize = undefined;
                                             widget.last_y = info.widgets_values[key].last_y;
                                             widget.origSerializeValue = nodeType.prototype.serializeValue;
+                                            widget.computeSize = () => [0, -4];
                                         }else{
                                             this.removeInput(this.inputs.indexOf(input));
                                         }
@@ -907,6 +921,12 @@ app.registerExtension({
                             }
 
                         }
+                        for (let w of this.inputs){
+                            if (w.name=="default"){
+                                w.type = info.widgets_values.type.value;
+                            }
+                        }
+                        this.outputs = info.outputs_values;
                         for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
@@ -922,6 +942,8 @@ app.registerExtension({
                         for (let w of this.widgets) {
                             info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type, origType: w.origType, last_y: w.last_y};
                         }
+
+
                         for (let w of this.inputs){
                             // if w.name exists in info.widgets_values
                             if (info.widgets_values[w.name]){
@@ -934,7 +956,7 @@ app.registerExtension({
                                 }
                             }
                         }
-
+                        info.outputs_values = this.outputs;
                     });
                     this.widgets[1].callback =  ( value ) => {
                         clearInputs(this);
