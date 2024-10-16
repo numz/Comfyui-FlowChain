@@ -532,7 +532,10 @@ app.registerExtension({
                                 }
                             }
                         }
-                        this.outputs = info.outputs_values;
+                        if (info.outputs_values != undefined){
+                            this.outputs = info.outputs_values;
+                        }
+
                         /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
@@ -646,9 +649,10 @@ app.registerExtension({
                             for (let [key, value] of Object.entries(widgetDict)) {
                                 let widget = this.widgets.find(w => w.name === key);
                                 let type = this.widgets.find(w => w.name === "type");
-                                if(!widget)
+                                if(!widget){
                                     addWidgetInfo(this, key, value, app);
                                     widget = this.widgets.find(w => w.name === key);
+                                }
                                     //this.widgets.push(value);
                                 widget.options = info.widgets_values[key].options;
                                 widget.value = info.widgets_values[key].value;
@@ -679,7 +683,9 @@ app.registerExtension({
                                 w.type = info.widgets_values.type.value;
                             }
                         }
-                        this.outputs = info.outputs_values;
+                        if (info.outputs_values != undefined){
+                            this.outputs = info.outputs_values;
+                        }
 
                         /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
@@ -798,9 +804,10 @@ app.registerExtension({
                             for (let [key, value] of Object.entries(widgetDict)) {
                                 let widget = this.widgets.find(w => w.name === key);
                                 let type = this.widgets.find(w => w.name === "type");
-                                if(!widget)
+                                if(!widget){
                                     addWidgetInfo(this, key, value, app);
                                     widget = this.widgets.find(w => w.name === key);
+                                }
                                     //this.widgets.push(value);
                                 widget.options = info.widgets_values[key].options;
                                 widget.value = info.widgets_values[key].value;
@@ -825,7 +832,9 @@ app.registerExtension({
 
                         }
 
-                        this.outputs = info.outputs_values;
+                        if (info.outputs_values != undefined){
+                            this.outputs = info.outputs_values;
+                        }
                         /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
@@ -895,14 +904,15 @@ app.registerExtension({
                             for (let [key, value] of Object.entries(widgetDict)) {
                                 let widget = this.widgets.find(w => w.name === key);
                                 let type = this.widgets.find(w => w.name === "type");
-                                if(!widget)
+                                if(!widget){
                                     addWidgetInfo(this, key, value, app);
                                     widget = this.widgets.find(w => w.name === key);
+                                }
                                     //this.widgets.push(value);
                                 widget.options = info.widgets_values[key].options;
                                 widget.value = info.widgets_values[key].value;
                                 //if value exists in inputs
-                                for (let input of this.inputs)
+                                for (let input of this.inputs){
                                     if (input.name == key){
                                         //find if key exists in inputs array in inputs.Name
                                         if (info.widgets_values[key].type == "converted-widget"){
@@ -918,20 +928,22 @@ app.registerExtension({
                                         }
                                         break;
                                     }
+                                }
                             }
-
                         }
                         for (let w of this.inputs){
                             if (w.name=="default"){
                                 w.type = info.widgets_values.type.value;
                             }
                         }
-                        this.outputs = info.outputs_values;
-                        for(let i = this.outputs.length - 1; i>0; i--){
+                        if (info.outputs_values != undefined){
+                            this.outputs = info.outputs_values;
+                        }
+                        /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
                             }
-                        }
+                        }*/
                     });
                     chainCallback(this, "onSerialize", function(info) {
                         info.widgets_values = {};
