@@ -532,15 +532,16 @@ app.registerExtension({
                                 }
                             }
                         }
-                        if (info.outputs_values != undefined){
-                            this.outputs = info.outputs_values;
+                        if (this.id == -1){
+                            for (let i = 0; i < this.outputs.length; i++) {
+                                this.outputs[i] = {links: null, name: info.outputs_values[i].name, type: info.outputs_values[i].type};
+                            }
+                        }else{
+                            if (info.outputs_values != undefined){
+                                this.outputs = [...info.outputs_values];
+                            }
                         }
                         this.setSize(info.size);
-                        /*for(let i = this.outputs.length - 1; i>0; i--){
-                            if (this.outputs[i].name == "*"){
-                                this.removeOutput(i);
-                            }
-                        }*/
                     });
                     chainCallback(this, "onSerialize", function(info) {
                         let inps = {};
@@ -556,7 +557,7 @@ app.registerExtension({
                         for (let w of this.widgets) {
                             info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type, origType: w.origType, last_y: w.last_y};
                         }
-                        info.outputs_values = this.outputs;
+                        info.outputs_values = [...this.outputs];
                         for (let w of this.inputs){
                             for (let [key, value] of Object.entries(inps)){
                                 if (value.inputs.Name == w.name){
@@ -565,8 +566,7 @@ app.registerExtension({
                                 }
                             }
                         }
-
-
+                        this.setSize(info.size);
                     });
 				    const workflow_reload = this.title.startsWith("Workflow: ")?true:false;
 
@@ -657,7 +657,7 @@ app.registerExtension({
                                 widget.options = info.widgets_values[key].options;
                                 widget.value = info.widgets_values[key].value;
                                 //if value exists in inputs
-                                for (let input of this.inputs)
+                                for (let input of this.inputs){
                                     if (input.name == key){
                                         //find if key exists in inputs array in inputs.Name
                                         if (info.widgets_values[key].type == "converted-widget"){
@@ -668,14 +668,13 @@ app.registerExtension({
                                             widget.last_y = info.widgets_values[key].last_y;
                                             widget.origSerializeValue = nodeType.prototype.serializeValue;
                                             widget.computeSize = () => [0, -4];
-
                                         }else{
                                             this.removeInput(this.inputs.indexOf(input));
                                         }
                                         break;
                                     }
+                                }
                             }
-
                         }
                         // get inputs by name
                         for (let w of this.inputs){
@@ -684,7 +683,12 @@ app.registerExtension({
                             }
                         }
                         if (info.outputs_values != undefined){
-                            this.outputs = info.outputs_values;
+                            // deep copy outputs
+                            if(this.id == -1){
+                                this.outputs[0] = {links: null, name: info.outputs_values.name, type: info.outputs_values.type};
+                            }else{
+                                this.outputs[0] = {...info.outputs_values};
+                            }
                         }
                         this.setSize(info.size);
                         /*for(let i = this.outputs.length - 1; i>0; i--){
@@ -714,21 +718,20 @@ app.registerExtension({
                                 }
                             }
                         }
-                        info.outputs_values = this.outputs;
+                        // deep copy outputs without reference
+                        if (this.outputs.length > 0){
+                            if (this.outputs[0].links == null){
+                                info.outputs_values = {links: null, name: this.outputs[0].name, type: this.outputs[0].type};
+                            }else{
+                                info.outputs_values = {links: [...this.outputs[0].links], name: this.outputs[0].name, slot_index: this.outputs[0].slot_index, type: this.outputs[0].type};
+                            }
+                        }
+                        this.setSize(info.size);
                     });
 
                     this.widgets[1].callback =  ( value ) => {
                         clearInputs(this);
                         switch(value){
-                            case "IMAGE":
-                                this.addOutput("output", "IMAGE");
-                                this.addInput("default", "IMAGE");
-
-                                break;
-                            case "MASK":
-                                this.addOutput("output", "MASK");
-                                this.addInput("default", "MASK");
-                                break;
                             case "STRING":
                                 this.addOutput("output", "STRING");
                                 ComfyWidgets.STRING(
@@ -756,30 +759,9 @@ app.registerExtension({
                                     app,
                                 )
                                 break;
-
-                            case "BOOLEAN":
-                                this.addOutput("output", "BOOLEAN");
-                                this.addWidget("toggle", "default", false, ()=>{});
-                                break;
-                            case "LATENT":
-                                this.addOutput("output", "LATENT");
-                                this.addInput("default", "LATENT");
-                                break;
-                            case "MODEL":
-                                this.addOutput("output", "MODEL");
-                                this.addInput("default", "MODEL");
-                                break;
-                            case "CLIP":
-                                this.addOutput("output", "CLIP");
-                                this.addInput("default", "CLIP");
-                                break;
-                            case "CONDITIONING":
-                                this.addOutput("output", "CONDITIONING");
-                                this.addInput("default", "CONDITIONING");
-                                break;
-                            case "VAE":
-                                this.addOutput("output", "VAE");
-                                this.addInput("default", "VAE");
+                            default:
+                                this.addOutput("output", value);
+                                this.addInput("default", value);
                                 break;
                         }
                         this.color = colors[node_type_list.indexOf(value)];
@@ -833,14 +815,14 @@ app.registerExtension({
                         }
 
                         if (info.outputs_values != undefined){
-                            this.outputs = info.outputs_values;
+                            // deep copy outputs
+                            if(this.id == -1){
+                                this.outputs[0] = {links: null, name: info.outputs_values.name, type: info.outputs_values.type};
+                            }else{
+                                this.outputs[0] = {...info.outputs_values};
+                            }
                         }
                         this.setSize(info.size);
-                        /*for(let i = this.outputs.length - 1; i>0; i--){
-                            if (this.outputs[i].name == "*"){
-                                this.removeOutput(i);
-                            }
-                        }*/
                     });
                     chainCallback(this, "onSerialize", function(info) {
                         info.widgets_values = {};
@@ -868,21 +850,20 @@ app.registerExtension({
                                 w.type = info.widgets_values.type.value;
                             }
                         }
-                        info.outputs_values = this.outputs;
+                        if (this.outputs.length > 0){
+                            if (this.outputs[0].links == null){
+                                info.outputs_values = {links: null, name: this.outputs[0].name, type: this.outputs[0].type};
+                            }else{
+                                info.outputs_values = {links: [...this.outputs[0].links], name: this.outputs[0].name, slot_index: this.outputs[0].slot_index, type: this.outputs[0].type};
+                            }
+                        }
+                        this.setSize(info.size);
                     });
 
                     this.widgets[0].callback =  ( value ) => {
                         clearInputs(this);
-                        switch(value){
-                            case "IMAGE":
-                                this.addOutput("output", "IMAGE");
-                                this.addInput("input", "IMAGE");
-                                break;
-                            case "LATENT":
-                                this.addOutput("output", "LATENT");
-                                this.addInput("input", "LATENT");
-                                break;
-                        }
+                        this.addOutput("output", value);
+                        this.addInput("input", value);
                         this.color = colors[node_type_list.indexOf(value)];
                         this.bgcolor = bg_colors[node_type_list.indexOf(value)];
                     };
@@ -938,7 +919,12 @@ app.registerExtension({
                             }
                         }
                         if (info.outputs_values != undefined){
-                            this.outputs = info.outputs_values;
+                            // deep copy outputs
+                            if(this.id == -1){
+                                this.outputs[0] = {links: null, name: info.outputs_values.name, type: info.outputs_values.type};
+                            }else{
+                                this.outputs[0] = {...info.outputs_values};
+                            }
                         }
                         /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
@@ -969,56 +955,20 @@ app.registerExtension({
                                 }
                             }
                         }
-                        info.outputs_values = this.outputs;
+                        if (this.outputs.length > 0){
+                            if (this.outputs[0].links == null){
+                                info.outputs_values = {links: null, name: this.outputs[0].name, type: this.outputs[0].type};
+                            }else{
+                                info.outputs_values = {links: [...this.outputs[0].links], name: this.outputs[0].name, slot_index: this.outputs[0].slot_index, type: this.outputs[0].type};
+                            }
+                        }
+                        this.setSize(info.size);
                     });
                     this.widgets[1].callback =  ( value ) => {
                         clearInputs(this);
-                        switch(value){
-                            case "IMAGE":
-                                this.addOutput("output", "IMAGE");
-                                this.addInput("default", "IMAGE");
-                                break;
-                            case "MASK":
-                                this.addOutput("output", "MASK");
-                                this.addInput("default", "MASK");
-                                break;
-                            case "STRING":
-                                this.addOutput("output", "STRING");
-                                this.addInput("default","STRING");
-                                break;
-                            case "INT":
-                                this.addOutput("output", "INT");
-                                this.addInput("default","INT");
-                                break;
-                            case "FLOAT":
-                                this.addOutput("output", "FLOAT");
-                                this.addInput("default","FLOAT");
-                                break;
-                            case "BOOLEAN":
-                                this.addOutput("output", "BOOLEAN");
-                                this.addInput("default","BOOLEAN");
-                                break;
-                            case "LATENT":
-                                this.addOutput("output", "LATENT");
-                                this.addInput("default", "LATENT");
-                                break;
-                            case "MODEL":
-                                this.addOutput("output", "MODEL");
-                                this.addInput("default", "MODEL");
-                                break;
-                            case "CLIP":
-                                this.addOutput("output", "CLIP");
-                                this.addInput("default", "CLIP");
-                                break;
-                            case "CONDITIONING":
-                                this.addOutput("output", "CONDITIONING");
-                                this.addInput("default", "CONDITIONING");
-                                break;
-                            case "VAE":
-                                this.addOutput("output", "VAE");
-                                this.addInput("default", "VAE");
-                                break;
-                        }
+                        this.addOutput("output", value);
+                        this.addInput("default", value);
+
                         this.color = colors[node_type_list.indexOf(value)];
                         this.bgcolor = bg_colors[node_type_list.indexOf(value)];
                     };
