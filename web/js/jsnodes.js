@@ -535,7 +535,7 @@ app.registerExtension({
                         if (info.outputs_values != undefined){
                             this.outputs = info.outputs_values;
                         }
-
+                        this.setSize(info.size);
                         /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
@@ -686,7 +686,7 @@ app.registerExtension({
                         if (info.outputs_values != undefined){
                             this.outputs = info.outputs_values;
                         }
-
+                        this.setSize(info.size);
                         /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
@@ -835,6 +835,7 @@ app.registerExtension({
                         if (info.outputs_values != undefined){
                             this.outputs = info.outputs_values;
                         }
+                        this.setSize(info.size);
                         /*for(let i = this.outputs.length - 1; i>0; i--){
                             if (this.outputs[i].name == "*"){
                                 this.removeOutput(i);
