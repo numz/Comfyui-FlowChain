@@ -761,6 +761,7 @@ app.registerExtension({
                             case "BOOLEAN":
                                 this.addOutput("output", "BOOLEAN");
                                 this.addWidget("toggle", "default", false, ()=>{});
+                                break;
                             default:
                                 this.addOutput("output", value);
                                 this.addInput("default", value);
