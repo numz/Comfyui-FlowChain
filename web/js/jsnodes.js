@@ -377,7 +377,6 @@ function addWidgetType(root_obj, value){
     }
 
     if (type == "BOOLEAN"){
-
         root_obj.addWidget("toggle",field_name,  input_value, ()=>{});
         const widget = root_obj.inputs.filter(i => i.name === field_name);
         if(widget.length > 0)
@@ -759,6 +758,9 @@ app.registerExtension({
                                     app,
                                 )
                                 break;
+                            case "BOOLEAN":
+                                this.addOutput("output", "BOOLEAN");
+                                this.addWidget("toggle", "default", false, ()=>{});
                             default:
                                 this.addOutput("output", value);
                                 this.addInput("default", value);
