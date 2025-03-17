@@ -556,7 +556,10 @@ app.registerExtension({
                         for (let w of this.widgets) {
                             info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type, origType: w.origType, last_y: w.last_y};
                         }
-                        info.outputs_values = [...this.outputs];
+                        info.outputs_values = []
+                        for (let w of this.outputs){
+                            info.outputs_values.push({links: w.links, name: w.name, type: w.type});
+                        }
                         for (let w of this.inputs){
                             for (let [key, value] of Object.entries(inps)){
                                 if (value.inputs.Name == w.name){
