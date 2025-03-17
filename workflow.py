@@ -486,7 +486,7 @@ def execute(server, prompt, prompt_id, extra_data={}, execute_outputs=[]):
             if caches.outputs.get(node_id) is not None:
                 cached_nodes.append(node_id)
 
-        comfy.model_management.cleanup_models(keep_clone_weights_loaded=True)
+        comfy.model_management.cleanup_models()
         add_message(server, "execution_cached",{"nodes": cached_nodes, "prompt_id": prompt_id}, broadcast=False)
         pending_subgraph_results = {}
         executed = set()
