@@ -509,25 +509,32 @@ app.registerExtension({
                                         addWidgetInfo(this, key, value, app);
                                         widget = this.widgets.find(w => w.name === key);
                                     }
-                                    widget.options = info.widgets_values[key].options;
-                                    widget.value = info.widgets_values[key].value;
-                                    for (let input of this.inputs)
-                                        if (input.name == key){
-                                            for (let [key2, value2] of Object.entries(inputs)){
-                                                if (value2.inputs.Name == key){
-                                                    input.type = value2.inputs.type;
-                                                    widget.type = "converted-widget"
-                                                    widget.origType = info.widgets_values[key].origType;
-                                                    widget.origComputeSize = undefined;
-                                                    widget.last_y = info.widgets_values[key].last_y;
-                                                    widget.origSerializeValue = nodeType.prototype.serializeValue;
-                                                    widget.value = info.widgets_values[key].value;
-                                                    widget.computeSize = () => [0, -4]; // -4 is due to the gap litegraph adds between widgets automatically
-                                                    break;
+
+                                    console.log(key)
+
+                                    if(widget){
+                                        console.log(info.widgets_values[key])
+                                        console.log(info.widgets_values[key].options)
+                                        widget.options = info.widgets_values[key].options;
+                                        widget.value = info.widgets_values[key].value;
+                                        for (let input of this.inputs)
+                                            if (input.name == key){
+                                                for (let [key2, value2] of Object.entries(inputs)){
+                                                    if (value2.inputs.Name == key){
+                                                        input.type = value2.inputs.type;
+                                                        widget.type = "converted-widget"
+                                                        widget.origType = info.widgets_values[key].origType;
+                                                        widget.origComputeSize = undefined;
+                                                        widget.last_y = info.widgets_values[key].last_y;
+                                                        widget.origSerializeValue = nodeType.prototype.serializeValue;
+                                                        widget.value = info.widgets_values[key].value;
+                                                        widget.computeSize = () => [0, -4]; // -4 is due to the gap litegraph adds between widgets automatically
+                                                        break;
+                                                    }
                                                 }
+                                                break;
                                             }
-                                            break;
-                                        }
+                                    }
                                 }
                             }
                         }
@@ -556,6 +563,7 @@ app.registerExtension({
                         for (let w of this.widgets) {
                             info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type, origType: w.origType, last_y: w.last_y};
                         }
+                        // info.outputs_values = [...this.outputs];
                         info.outputs_values = []
                         for (let w of this.outputs){
                             info.outputs_values.push({links: w.links, name: w.name, type: w.type});
