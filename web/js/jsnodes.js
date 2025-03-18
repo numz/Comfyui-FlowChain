@@ -517,10 +517,12 @@ app.registerExtension({
                                         console.log(info.widgets_values[key].options)
                                         widget.options = info.widgets_values[key].options;
                                         widget.value = info.widgets_values[key].value;
+                                        /*
                                         for (let input of this.inputs)
                                             if (input.name == key){
                                                 for (let [key2, value2] of Object.entries(inputs)){
                                                     if (value2.inputs.Name == key){
+
                                                         input.type = value2.inputs.type;
                                                         widget.type = "converted-widget"
                                                         widget.origType = info.widgets_values[key].origType;
@@ -530,10 +532,12 @@ app.registerExtension({
                                                         widget.value = info.widgets_values[key].value;
                                                         widget.computeSize = () => [0, -4]; // -4 is due to the gap litegraph adds between widgets automatically
                                                         break;
+
                                                     }
                                                 }
                                                 break;
                                             }
+                                        */
                                     }
                                 }
                             }
@@ -667,26 +671,28 @@ app.registerExtension({
                                 widget.options = info.widgets_values[key].options;
                                 widget.value = info.widgets_values[key].value;
                                 //if value exists in inputs
+
                                 for (let input of this.inputs){
                                     if (input.name == key){
                                         //find if key exists in inputs array in inputs.Name
-                                        if (info.widgets_values[key].type == "converted-widget"){
-                                            input.type = info.widgets_values.type.value;
-                                            widget.type = "converted-widget"
+                                        if (info.widgets_values[key].type != "converted-widget"){
+                                            this.removeInput(this.inputs.indexOf(input));
+                                            //input.type = info.widgets_values.type.value;
+                                            /*widget.type = "converted-widget"
                                             widget.origType = info.widgets_values[key].origType;
                                             widget.origComputeSize = undefined;
                                             widget.last_y = info.widgets_values[key].last_y;
                                             widget.origSerializeValue = nodeType.prototype.serializeValue;
-                                            widget.computeSize = () => [0, -4];
-                                        }else{
-                                            this.removeInput(this.inputs.indexOf(input));
+                                            widget.computeSize = () => [0, -4];*/
                                         }
                                         break;
                                     }
                                 }
+
                             }
                         }
                         // get inputs by name
+
                         for (let w of this.inputs){
                             if (w.name=="default"){
                                 w.type = info.widgets_values.type.value;
@@ -808,24 +814,23 @@ app.registerExtension({
                                 widget.options = info.widgets_values[key].options;
                                 widget.value = info.widgets_values[key].value;
                                 //if value exists in inputs
+
                                 for (let input of this.inputs)
                                     if (input.name == key){
                                         //find if key exists in inputs array in inputs.Name
-                                        if (info.widgets_values[key].type == "converted-widget"){
-                                            input.type = info.widgets_values.type.value;
-                                            widget.type = "converted-widget"
+                                        if (info.widgets_values[key].type != "converted-widget"){
+                                            this.removeInput(this.inputs.indexOf(input));
+                                            //input.type = info.widgets_values.type.value;
+                                            /*widget.type = "converted-widget"
                                             widget.origType = info.widgets_values[key].origType;
                                             widget.origComputeSize = undefined;
                                             widget.last_y = info.widgets_values[key].last_y;
                                             widget.origSerializeValue = nodeType.prototype.serializeValue;
-                                            widget.computeSize = () => [0, -4];
-                                        }else{
-                                            this.removeInput(this.inputs.indexOf(input));
+                                            widget.computeSize = () => [0, -4];*/
                                         }
                                         break;
                                     }
                             }
-
                         }
 
                         if (info.outputs_values != undefined){
@@ -908,25 +913,29 @@ app.registerExtension({
                                 widget.options = info.widgets_values[key].options;
                                 widget.value = info.widgets_values[key].value;
                                 //if value exists in inputs
+
                                 for (let input of this.inputs){
                                     if (input.name == key){
                                         //find if key exists in inputs array in inputs.Name
-                                        if (info.widgets_values[key].type == "converted-widget"){
-                                            input.type = info.widgets_values.type.value;
+                                        if (info.widgets_values[key].type != "converted-widget"){
+                                            this.removeInput(this.inputs.indexOf(input));
+                                            //input.type = info.widgets_values.type.value;
+                                            /*
                                             widget.type = "converted-widget"
                                             widget.origType = info.widgets_values[key].origType;
                                             widget.origComputeSize = undefined;
                                             widget.last_y = info.widgets_values[key].last_y;
                                             widget.origSerializeValue = nodeType.prototype.serializeValue;
                                             widget.computeSize = () => [0, -4];
-                                        }else{
-                                            this.removeInput(this.inputs.indexOf(input));
+                                            */
                                         }
                                         break;
                                     }
                                 }
+
                             }
                         }
+
                         for (let w of this.inputs){
                             if (w.name=="default"){
                                 w.type = info.widgets_values.type.value;
