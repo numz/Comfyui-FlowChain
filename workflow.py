@@ -8,6 +8,7 @@ import uuid
 import traceback
 import nodes
 import copy
+import os
 import asyncio
 from enum import Enum
 import numpy as np
@@ -23,6 +24,9 @@ from PIL import Image
 from comfy_execution.graph_utils import is_link, GraphBuilder
 from nodes import SaveImage
 import gc
+import folder_paths
+
+from execution import PromptExecutor
 
 class ExecutionResult(Enum):
     SUCCESS = 0
@@ -43,6 +47,7 @@ class AnyType(str):
 client_id = '5b49a023-b05a-4c53-8dc9-addc3a749911'
 server_address = "127.0.0.1:8188"
 
+script_list_path = os.path.join(folder_paths.user_directory, "default", "workflows", "api")
 
 def _map_node_over_list(obj, input_data_all, func, allow_interrupt=False, execution_block_cb=None, pre_execute_cb=None):
     # check if node wants the lists
@@ -599,10 +604,20 @@ class Workflow(SaveImage):
         # get current file path
 
         def get_workflow(workflow_name):
+            """
             with urllib.request.urlopen(
                     "http://{}/flowchain/workflow?workflow_path={}".format(server_address, workflow_name)) as response:
                 workflow = json.loads(response.read())
-            return workflow["workflow"]
+            """
+            json_path = os.path.join(script_list_path, workflow_name)
+            if os.path.exists(json_path):
+                with open(json_path, "r", encoding="utf-8") as f:
+                    json_content = json.load(f)
+                if "nodes" in json_content:
+                    print("json is not an api worflow:",workflow_name)
+            else:
+                print("File not found:",workflow_name)
+            return json_content
 
         def populate_inputs(workflow, inputs, kwargs_values):
             workflow_inputs = {k: v for k, v in workflow.items() if v["class_type"] == "WorkflowInput"}
@@ -860,6 +875,9 @@ class Workflow(SaveImage):
         servers.client_id = client_id
         execution_start_time = time.perf_counter()
         logging.info("workflow : {}".format(workflows))
+        #p_executor = PromptExecutor(servers)
+        #p_executor.execute(workflow, prompt_id, {}, workflow_outputs_id)
+        #history_result = p_executor.history_result
         history_result = execute(servers, workflow, prompt_id, {}, workflow_outputs_id)
         current_time = time.perf_counter()
         execution_time = current_time - execution_start_time
