@@ -12,6 +12,7 @@ NODE_CLASS_MAPPINGS.update(NODE_CLASS_MAPPINGS_WORKFLOW)
 NODE_DISPLAY_NAME_MAPPINGS.update(NODE_DISPLAY_NAME_MAPPINGS_NODES)
 NODE_DISPLAY_NAME_MAPPINGS.update(NODE_DISPLAY_NAME_MAPPINGS_WORKFLOW)
 
+
 def get_ext_dir(subpath=None, mkdir=False):
     dir = os.path.dirname(__file__)
     if subpath is not None:
@@ -43,4 +44,3 @@ for file in files:
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
 
 WEB_DIRECTORY = "./web"
-

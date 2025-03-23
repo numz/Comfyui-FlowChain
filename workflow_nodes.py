@@ -144,14 +144,14 @@ class WorkflowOutput:
                     image_tensor = image_tensor.permute(1, 2, 0)
                     image_tensor = image_tensor.unsqueeze(0)
                     return {"ui": {"default": image_tensor}}
-                return {"ui": {"default": kwargs["default"]}}
+                return {"ui": {"default": [kwargs["default"]]}}
             elif type == "LATENT":
                 if kwargs["default"] is None:
                     return {"ui": {"default": torch.tensor([])}}
-                return {"ui": {"default": kwargs["default"]}}
+                return {"ui": {"default": [kwargs["default"]]}}
             else:
                 ui = {"ui": {}}
-                ui["ui"]["default"] = kwargs["default"]
+                ui["ui"]["default"] = [kwargs["default"]]
                 return ui
 
 
