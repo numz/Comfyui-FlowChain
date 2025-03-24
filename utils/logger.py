@@ -4,14 +4,12 @@ import sys
 from dataclasses import dataclass
 
 
-
 def Logger():
-
     try:
         # Create logger
         logger = logging.getLogger(__name__)
         # set log level to no print
-        #logger.setLevel(logging.CRITICAL)
+        # logger.setLevel(logging.CRITICAL)
         logger.setLevel(logging.DEBUG)
         if len(logger.handlers) > 0:
             logger.handlers.clear()
