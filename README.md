@@ -37,8 +37,22 @@ The idea came from the frustration users experienced with the many limitations a
 By solving these problems, my tool makes node management more intuitive, stable, and efficient, allowing you to focus on what matters: creating.
 
 ## 🚀 Updates
+**2025.03.23**
+First of all, I apologize for not maintaining the code regularly. ComfyUI has evolved significantly since my last version, so I've completely revised the code to ensure better integration with ComfyUI and avoid future issues.
+
+Features in this version:
+- 💪 No need to convert your workflows to API format anymore - you can use original workflows directly.
+- 💪 Better cache management
+- 🗑️ remove "import workflow", no longer usefull since working on standart workflow.
+- 
+
+Warning and know issue:
+- 🛑 old version will not be compatible, sorry about that
+- ⚠️ The word "seed" in input as "INT" will break the node so if you wan't use "seed" as input prefer to give a name like "seed_input" or whatever...
+
+
 **2024.11.01 Initial version features :**
-- 💪 Convert your workflows into nodes
+1 Convert your workflows into nodes
 - ⛓️ Chain your workflow
 - 👄 Extra Node that use [LipSync Studio v0.6](https://www.patreon.com/Wav2LipStudio)
 
@@ -93,19 +107,14 @@ After this command be created folder Comfyui-FlowChain
 ## ⛓️ Workflow Node
 ![Illustration](docs/assets/workflow2.png)
 
- - Load a workflow in **workflows** list. This field will show all workflows saved in the comfyui user folder: **ComfyUI\user\default\workflows\api**, if you add a new workflow in this folder you have to refresh UI (F5 to refresh web page) to see it in the **workflows** list.
- - Workflows have to be saved as **API format** of comfyui, but save it also in normal format because "api formal file" can't be loaded in comfyui as usually.
+Select a workflow from the **workflows** dropdown menu. This list displays all compatible workflows saved in your ComfyUI user directory:
 
- <img src="docs/assets/save_as_api.png">
+`ComfyUI\user\default\workflows`
 
-If you don't see **"Export (API format)"** options in Comfyui do this :
- - go to Settings
- - Activate the **Dev Mode** options
+For a workflow to be considered **compatible**, it must contain at least one "Workflow Input" or "Workflow Output" node. This ensures the workflow can properly interface with the FlowChain system.
 
-![Illustration](docs/assets/devmode.png)
-
--You can also Import the file by "copy/paste" your workflow path in "workflow_api_path" and click import, that will add your workflow in the comfyui api path.
-
+**Note:** After adding new workflows to this directory, you'll need to refresh the ComfyUI interface (press F5) to see them appear in the dropdown list. But once loaded, it will refresh the parent node automatically
+  
 ## ⛓️ Input Node
 ![Illustration](docs/assets/input2.png)
 

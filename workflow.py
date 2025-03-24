@@ -277,12 +277,13 @@ class Workflow(SaveImage):
             # get max workflow id
             # coinvert workflow_outputs to list
             workflow_outputs = list(workflow_outputs.values())
-            workflow_node = {"node": {"id":k, **v} for k, v in workflow.items() if v["class_type"] == "Workflow" and v["inputs"]["workflows"] == workflow_name}
+            # prendre le premier workflow
+            workflow_node = [{"id":k, **v} for k, v in workflow.items() if v["class_type"] == "Workflow" and v["inputs"]["workflows"] == workflow_name][0]
             sub_input_nodes = {k: v for k, v in subworkflow.items() if v["class_type"] == "WorkflowInput"}
             do_not_delete = []
             for sub_id, sub_node in sub_input_nodes.items():
-                if sub_node["inputs"]["Name"] in workflow_node["node"]["inputs"]:
-                    value = workflow_node["node"]["inputs"][sub_node["inputs"]["Name"]]
+                if sub_node["inputs"]["Name"] in workflow_node["inputs"]:
+                    value = workflow_node["inputs"][sub_node["inputs"]["Name"]]
                     if type(value) == list:
                         subworkflow = change_subnode(subworkflow, sub_id, value)
                     else:
@@ -298,7 +299,7 @@ class Workflow(SaveImage):
                 for input_name, input_value in node["inputs"].items():
                     if type(input_value) == list:
                         if len(input_value) > 0:
-                            if input_value[0] == workflow_node["node"]["id"]:
+                            if input_value[0] == workflow_node["id"]:
                                 for sub_output_id, sub_output_node in sub_output_nodes.items():
                                     if sub_output_node["inputs"]["Name"] == workflow_outputs[input_value[1]]["inputs"]["Name"]:
                                         workflow[node_id]["inputs"][input_name] = sub_output_node["inputs"]["default"]
@@ -340,8 +341,7 @@ class Workflow(SaveImage):
 
                 workflow_outputs_sub = {k: v for k, v in subworkflow.items() if v["class_type"] == "WorkflowOutput"}
                 workflow, subworkflow = merge_inputs_outputs(workflow, workflow_name, subworkflow, workflow_outputs_sub)
-                workflow = {k: v for k, v in workflow.items() if
-                            not (v["class_type"] == "Workflow" and v["inputs"]["workflows"] == workflow_name)}
+                workflow = {k: v for k, v in workflow.items() if k != key}
                 # add subworkflow to workflow
                 workflow.update(subworkflow)
             return workflow, max_id
@@ -393,16 +393,18 @@ class Workflow(SaveImage):
             }
             
             # Now you can access the original inputs as before
-            queue_to_use = len(queue_info["queue_pending"]) > 0 and queue_info["queue_pending"] or queue_info["queue_running"]
+            queue_to_use = queue_info["queue_running"]
             original_inputs = [v["inputs"] for k, v in queue_to_use[0][2].items() if
                             "workflows" in v["inputs"] and v["inputs"]["workflows"] == workflows][0]
 
             # find "workflow" node in queue_info["queue_pending"][-1][3]["extra_png_info"]["workflow"]["nodes"]
+            """
             for node in queue_to_use[-1][3]["extra_pnginfo"]["workflow"]["nodes"]:
                 workflow_name = 'Workflow: ' + original_inputs["workflows"].replace(".json", "").replace("_", " ")
                 if node["type"] == "Workflow" and node["title"] == workflow_name:
                     workflow = node["widgets_values"][1]
                     break
+            """
 
         else:
             # Fallback to empty inputs if server instance not available
