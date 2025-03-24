@@ -798,7 +798,7 @@ app.registerExtension({
                                             const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
                                             addInputs(this, inputs, info.widgets_values);
                                             addOutputs(this, info.widgets_values[0]);
-                                            importWorkflow(this, info.widgets_values[0], app, nodeData)
+                                            //importWorkflow(this, info.widgets_values[0], app, nodeData)
                                         }
                                     })
                                     .catch(error => {
@@ -851,10 +851,13 @@ app.registerExtension({
                                     w.type = this.local_input_defs.required[w.name][0];
                             }
                         }
+                        if(this.widgets[0].options.values == "COMBO"){
+                            this.widgets[0].options.values = ["None", ...Object.keys(app.lipsync_studio)];
+                        }
                     });
                     const workflow_reload = this.title.startsWith("Workflow: ")?true:false;
                     
-                        
+                    // nodeData.input.required.workflows = ["COMBO", {values:["None", ...Object.keys(app.lipsync_studio)]}]
                     this.widgets[0].options.values = ["None", ...Object.keys(app.lipsync_studio)]
                     this.widgets[0].callback =  ( value ) => {
                         cleanInputs(this);
@@ -1107,6 +1110,7 @@ app.registerExtension({
                     this.color = colors[node_type_list.indexOf("none")];
                     this.bgcolor = bg_colors[node_type_list.indexOf("none")];
                 }
+
 			    break;
 			case "WorkflowContinue":
 			    nodeType.prototype.onNodeCreated =  function() {
