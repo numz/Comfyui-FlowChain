@@ -5,6 +5,7 @@ import json
 import folder_paths
 from app.user_manager import UserManager
 
+
 def get_workflow_data(workflow_file):
     nodes_input = {}
     nodes_output = {}
@@ -37,6 +38,7 @@ def get_workflow_data(workflow_file):
                 "outputs": nodes_output,
                 'workflow': workflow_file}
 
+
 @server.PromptServer.instance.routes.get("/flowchain/workflows")
 async def workflows(request):
     user = UserManager().get_request_user_id(request)
@@ -57,7 +59,7 @@ async def workflows(request):
                             json_content = json.load(f)
                         relative_path = os.path.relpath(file_path, json_path)
                         result[relative_path] = get_workflow_data(json_content)
-                        
+
                     except json.JSONDecodeError:
                         # Ignorer les fichiers JSON mal formés
                         print(f"Ignoring malformed JSON file: {file_path}")
@@ -83,9 +85,8 @@ async def workflow(request):
     unversal_path = original_path.replace("\\", "/")
     json_path = unversal_path.split("/")
     if ".json" in json_path[-1]:
-        #file_name = json_path[-1]
+        # file_name = json_path[-1]
         json_path = folder_paths.user_directory + "/" + user + "/workflows/" + unversal_path
-
 
     if os.path.exists(json_path):
         with open(json_path, "r", encoding="utf-8") as f:
@@ -96,4 +97,3 @@ async def workflow(request):
         result = {"error": "File not found"}
 
     return web.json_response(result, content_type='application/json')
-

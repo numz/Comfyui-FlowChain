@@ -7,7 +7,6 @@ from enum import Enum
 import numpy as np
 import hashlib
 from torchvision import transforms
-from .utils.logger import Logger
 import comfy.model_management
 from PIL import Image
 from nodes import SaveImage
@@ -15,7 +14,6 @@ import gc
 import folder_paths
 from server import PromptServer
 from execution import PromptExecutor
-from .utils.utils import convert_standard_to_api_format
 
 
 class ExecutionResult(Enum):
@@ -34,7 +32,6 @@ class AnyType(str):
         return False
 
 
-#client_id = '5b49a023-b05a-4c53-8dc9-addc3a749911'
 script_list_path = os.path.join(folder_paths.user_directory, "default", "workflows")
 
 
@@ -67,11 +64,7 @@ class Workflow(SaveImage):
                 "workflows": ("COMBO", {"values": []}),
                 "workflow": ("STRING", {"default": ""})
             },
-            "optional": {
-
-                # "workflows": ("STRING", {"default": ""}),
-
-            }
+            "optional": {}
         }
 
     RETURN_TYPES = (

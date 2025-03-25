@@ -5,15 +5,13 @@ import subprocess
 import folder_paths
 import numpy as np
 import hashlib
-from .utils.utils import ffmpeg_path
-from .utils.logger import Logger
+from .utils.utils import get_ffmpeg_path
 import sys
 from PIL import Image
 
 
 class WorkflowLipSync:
     def __init__(self):
-        self.logger = Logger()
         self.ws = None
 
     @classmethod
@@ -133,7 +131,7 @@ class WorkflowLipSync:
         # FFmpeg command to save audio in WAV format
         channels = audio['waveform'].size(1)
 
-        wav_args = [ffmpeg_path, "-v", "error", "-n",
+        wav_args = [ffmpeg_path(), "-v", "error", "-n",
                     "-ar", str(audio['sample_rate']),  # Sample rate
                     "-ac", str(channels),  # Number of channels
                     "-f", "f32le", "-i", "-",  # Audio format and input from stdin
