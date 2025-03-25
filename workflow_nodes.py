@@ -122,7 +122,6 @@ class WorkflowOutput:
     OUTPUT_NODE = True
 
 
-
     @classmethod
     def IS_CHANGED(s, Name, type, ui=True, **kwargs):
         m = hashlib.sha256()
@@ -158,33 +157,12 @@ class WorkflowOutput:
 NODE_CLASS_MAPPINGS_NODES = {
     "WorkflowInput": WorkflowInput,
     "WorkflowOutput": WorkflowOutput,
-
-    # "WorkflowInputImage": WorkflowInputImage,
-    # "WorkflowInputString": WorkflowInputString,
-    # "WorkflowInputBoolean": WorkflowInputBoolean,
-    # "WorkflowInputInteger": WorkflowInputInteger,
-    # "WorkflowInputFloat": WorkflowInputFloat,
-    # "WorkflowOutputImage": WorkflowOutputImage,
-    # "WorkflowInputSwitch": WorkflowInputSwitch,
-    # "WorkflowContinueImage": WorkflowContinueImage,
-    # "WorkflowContinueLatent": WorkflowContinueLatent,
     "WorkflowContinue": WorkflowContinue,
-
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS_NODES = {
     "WorkflowInput": "Workflow Input (FlowChain ⛓️)",
     "WorkflowOutput": "Workflow Output (FlowChain ⛓️)",
-    # "WorkflowInputImage": "Workflow Input Image (Lipsync Studio)",
-    # "WorkflowInputString": "Workflow Input String (Lipsync Studio)",
-    # "WorkflowInputBoolean": "Workflow Input Boolean (Lipsync Studio)",
-    # "WorkflowInputInteger": "Workflow Input Integer (Lipsync Studio)",
-    # "WorkflowInputFloat": "Workflow Input Float (Lipsync Studio)",
-    # "WorkflowOutputImage": "Workflow Output Image (Lipsync Studio)",
-    # "WorkflowInputSwitch": "Workflow Input Switch (Lipsync Studio)",
-    # "WorkflowContinueImage": "Workflow Continue Image (Lipsync Studio)",
-    # "WorkflowContinueLatent": "Workflow Continue Latent (Lipsync Studio)",
     "WorkflowContinue": "Workflow Continue (FlowChain ⛓️)",
-    # "VisualizeOpticalFlow": "Visualize optical flow",
 }

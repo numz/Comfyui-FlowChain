@@ -91,27 +91,7 @@ class Workflow(SaveImage):
         return m.digest().hex()
 
     def generate(self, workflows, workflow, **kwargs):
-        # get current file path
-        """
-        def get_workflow(workflow_name):
-            json_path = os.path.join(script_list_path, workflow_name)
-            if os.path.exists(json_path):
-                with open(json_path, "r", encoding="utf-8") as f:
-                    json_content = json.load(f)
-                if "nodes" in json_content:
-                    try:
-                        api_workflow = convert_standard_to_api_format(json_content)
-                        if api_workflow:
-                            json_content = api_workflow
-                        else:
-                            print("Échec de la conversion du workflow standard en format API")
-                    except Exception as e:
-                        print(f"Erreur lors de la conversion: {str(e)}")
-            else:
-                print("File not found:",workflow_name)
 
-            return json_content
-        """
         def populate_inputs(workflow, inputs, kwargs_values):
             workflow_inputs = {k: v for k, v in workflow.items() if v["class_type"] == "WorkflowInput"}
             for key, value in workflow_inputs.items():
@@ -345,44 +325,7 @@ class Workflow(SaveImage):
                 # add subworkflow to workflow
                 workflow.update(subworkflow)
             return workflow, max_id
-        """
-        def format_output_value(value, type_name):
-            if value is None:
-                return None
-                
-            if type_name == "STRING":
-                # Convert list of characters or bytes to string
-                if isinstance(value, list) and all(isinstance(x, (str, bytes)) for x in value):
-                    return ''.join(value)
-                elif isinstance(value, (bytes, bytearray)):
-                    return value.decode('utf-8')
-            
-            elif type_name == "INT":
-                # Ensure integer conversion
-                try:
-                    return int(value)
-                except (ValueError, TypeError):
-                    pass
-                    
-            elif type_name == "FLOAT":
-                # Ensure float conversion 
-                try:
-                    return float(value)
-                except (ValueError, TypeError):
-                    pass
-                    
-            elif type_name == "BOOLEAN":
-                # Convert to proper boolean
-                if isinstance(value, (str, list)):
-                    if isinstance(value, str):
-                        return value.lower() in ('true', 'yes', '1', 't', 'y')
-                    elif len(value) > 0:
-                        return bool(value[0])
-                return bool(value)
-                
-            # For other types (LATENT, CLIP, MODEL, etc.), return as-is
-            return value
-        """
+        
         server_instance = PromptServer.instance
         client_id = server_instance.client_id
         if server_instance and hasattr(server_instance, 'prompt_queue'):
@@ -396,15 +339,6 @@ class Workflow(SaveImage):
             queue_to_use = queue_info["queue_running"]
             original_inputs = [v["inputs"] for k, v in queue_to_use[0][2].items() if
                             "workflows" in v["inputs"] and v["inputs"]["workflows"] == workflows][0]
-
-            # find "workflow" node in queue_info["queue_pending"][-1][3]["extra_png_info"]["workflow"]["nodes"]
-            """
-            for node in queue_to_use[-1][3]["extra_pnginfo"]["workflow"]["nodes"]:
-                workflow_name = 'Workflow: ' + original_inputs["workflows"].replace(".json", "").replace("_", " ")
-                if node["type"] == "Workflow" and node["title"] == workflow_name:
-                    workflow = node["widgets_values"][1]
-                    break
-            """
 
         else:
             # Fallback to empty inputs if server instance not available

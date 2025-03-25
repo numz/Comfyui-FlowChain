@@ -274,14 +274,7 @@ function addLoadVideoCommon(nodeType, nodeData) {
     addPreviewOptions(nodeType);
 }
 function cleanInputs(root_obj, start_index = 2, reset_value=true) {
-    //nodeData.input.required = {};
-    /*
-    if (!root_obj.inputs) root_obj.inputs = [];
-    if (!root_obj.outputs) root_obj.outputs = [];
-    if (!root_obj.widgets) root_obj.widgets = [];
-    if (!root_obj.widgets_values) root_obj.widgets_values = [];
-    */
-    // Disconnect all links first
+
     for (let i = 0; i < root_obj.outputs.length; i++) {
         const output = root_obj.outputs[i];
         if (output.links && output.links.length) {
@@ -305,12 +298,6 @@ function cleanInputs(root_obj, start_index = 2, reset_value=true) {
     root_obj.widgets = root_obj.widgets.splice(0,start_index)
     if(reset_value){
         root_obj.widgets_values = [];
-        /*
-        for (let key in root_obj.widgets_values) {
-            if (key != "workflows"){
-                delete root_obj.widgets_values[key];
-            }
-        }*/
         const max_node_output = root_obj.outputs.length;
         for(let i = 0; i<max_node_output; i++)
             root_obj.removeOutput(0)
@@ -319,11 +306,6 @@ function cleanInputs(root_obj, start_index = 2, reset_value=true) {
     const max_node_input = root_obj.inputs.length;
     for(let i = 0; i<max_node_input; i++)
         root_obj.removeInput(0)
-    /*
-    if (root_obj.graph) {
-        root_obj.graph.setDirtyCanvas(true);
-        root_obj.graph.change();
-    }*/
 
 }
 function clearInputs(root_obj, reset_value=true) {
@@ -375,70 +357,7 @@ function clearInputs(root_obj, reset_value=true) {
     }*/
 
 }
-/*
-function addWidgetType(root_obj, value, nodeData){
-    if (!root_obj.widgets) {
-        root_obj.widgets = [];
-    }
-    if (!root_obj.inputs) {
-        root_obj.inputs = [];
-    }
-    const field_name = value.Name
-    const type = value.type
-    if (type == "IMAGE" && root_obj.inputs.filter(i => i.name === field_name).length == 0){
-        root_obj.addInput(field_name, "IMAGE");
-        
-    }
-    
-    //const input_value = root_obj.widgets.length + 1 < root_obj.widgets_values.length?root_obj.widgets_values[root_obj.widgets.length]:value.default;
-    if (type == "STRING" || type =="text"){
-        ComfyWidgets.STRING(root_obj, field_name,  ['STRING', {default: value.default},], app,)
-        if (nodeData.input.required == undefined) nodeData.input.required = {};
-        //nodeData.input.required[field_name] = ["STRING", {"min": 0, "max": 18446744073709551616, "step": 1}]
-        root_obj.local_input_defs.required[field_name] = ["STRING", {}];
 
-     }
-
-    if (type == "INT"){
-        ComfyWidgets.INT(
-            root_obj,
-            field_name,
-            ['INT',{default: value.default},], app,)
-        if (nodeData.input.required == undefined) nodeData.input.required = {};
-        //nodeData.input.required[field_name] = ["INT", {"min": 0, "max": 18446744073709551616, "step": 1}]
-        root_obj.local_input_defs.required[field_name] = ["INT", {"min": 0, "max": 18446744073709551616, "step": 1}];
-
-        
-    }
-    if (type == "FLOAT"){
-        ComfyWidgets.FLOAT(
-            root_obj,
-            field_name,
-            ['FLOAT',{default: value.default, "min": 0.00, "max": 2048.00, "step": 0.01},],
-            app,
-        )
-        if (nodeData.input.required == undefined) nodeData.input.required = {};
-        //nodeData.input.required[field_name] = ["FLOAT", {"min": 0.00, "max": 2048.00, "step": 0.01}]
-        root_obj.local_input_defs.required[field_name] = ["FLOAT", {"min": 0.00, "max": 2048.00, "step": 0.01}];
-
-    }
-
-    if (type == "BOOLEAN"){
-        root_obj.addWidget("toggle",field_name,  value.default, ()=>{});
-        const widget = root_obj.inputs.filter(i => i.name === field_name);
-        if(widget.length > 0)
-            app.convertToWidget(root_obj, widget[0]);
-    }
-
-    if (type == "LATENT") root_obj.addInput(field_name, "LATENT");
-    if (type == "MODEL") root_obj.addInput(field_name, "MODEL");
-    if (type == "CLIP") root_obj.addInput(field_name, "CLIP");
-    if (type == "MASK") root_obj.addInput(field_name, "MASK");
-    if (type == "CONDITIONING") root_obj.addInput(field_name, "CONDITIONING");
-    if (type == "VAE") root_obj.addInput(field_name, "VAE");
-}
-
-*/
 async function convertWorkflowToApiFormat(standardWorkflow) {
     try {
         return new Promise((resolve, reject) => {
@@ -552,30 +471,6 @@ async function importWorkflow(root_obj, workflow_path, app, nodeData, reset_valu
                 console.error('Workflow invalide ou échec de conversion');
                 return false;
             }
-            /*
-            // Traiter le workflow API
-            const nodes_input = Object.fromEntries(
-                Object.entries(workflow).filter(([k, v]) => v.class_type == "WorkflowInput")
-            );
-
-            const nodes_output = Object.fromEntries(
-                Object.entries(workflow).filter(([k, v]) => v.class_type == "WorkflowOutput")
-            );
-            root_obj.widgets[1].value = JSON.stringify(workflow);
-            
-            
-            Object.entries(nodes_input).forEach(node => {
-                addWidgetType(root_obj, node[1].inputs, nodeData);
-            });
-
-            // Ajouter les sorties
-            Object.entries(nodes_output).forEach(node => {
-                root_obj.addOutput(`${node[1].inputs.Name}`, node[1].inputs.type);
-            });
-            
-            
-
-            root_obj.size[0] = 400;*/
             return JSON.stringify(workflow);
         
         })
@@ -600,45 +495,45 @@ function addWidgets(root_obj, field_name, value, app){
     }
     
     if ((type == "STRING" || type =="text") && field_name != "workflow"){
-        ComfyWidgets.STRING(root_obj, field_name, ['STRING',{default: value.value,},],app,)
+        ComfyWidgets.STRING(root_obj, field_name, ['STRING', getDefaultOptions("STRING", value.value),],app,)
         // Stocker la définition localement au lieu de modifier nodeData
-        root_obj.local_input_defs.required[field_name] = ["STRING", {}];
+        root_obj.local_input_defs.required[field_name] = ["STRING", getDefaultOptions("STRING", value.value)];
     }
     
     if (type == "INT" || type == "number"){
         ComfyWidgets.INT(
             root_obj,
             field_name,
-            ['INT',{default: value.value, "min": 0, "max": 18446744073709551616, "step": 1},],
+            ['INT', getDefaultOptions("INT", value.value),],
             app,
         )
         // Stocker la définition localement
-        root_obj.local_input_defs.required[field_name] = ["INT", {"min": 0, "max": 18446744073709551616, "step": 1}];
+        root_obj.local_input_defs.required[field_name] = ["INT", getDefaultOptions("INT", value.value)];
     }
     
     if (type == "FLOAT"){
         ComfyWidgets.FLOAT(
             root_obj,
             field_name,
-            ['FLOAT',{default: value.value, "min": 0.00, "max": 2048.00, "step": 0.01},],
+            ['FLOAT',getDefaultOptions("FLOAT", value.value),],
             app,
         )
         // Stocker la définition localement
-        root_obj.local_input_defs.required[field_name] = ["FLOAT", {"min": 0.00, "max": 2048.00, "step": 0.01}];
+        root_obj.local_input_defs.required[field_name] = ["FLOAT", getDefaultOptions("FLOAT", value.value)];
     }
     
     if (type == "BOOLEAN" || type == "toggle"){
         root_obj.addWidget("toggle",field_name, value.value, ()=>{});
         // Stocker la définition localement
-        root_obj.local_input_defs.required[field_name] = ["BOOLEAN", {}];
+        root_obj.local_input_defs.required[field_name] = ["BOOLEAN", getDefaultOptions("BOOLEAN", value.value)];
     }
-    
+    /*
     if (field_name == "workflow"){
         root_obj.addWidget("STRING", field_name, value.value, ()=>{});
         root_obj.widgets[root_obj.widgets.length - 1].hidden = true;
         // Stocker la définition localement 
         root_obj.local_input_defs.required[field_name] = ["STRING", {}];
-    }
+    }*/
     if (type == "IMAGE") root_obj.addInput(field_name, "IMAGE");
     if (type == "LATENT") root_obj.addInput(field_name, "LATENT");
     if (type == "MODEL") root_obj.addInput(field_name, "MODEL");
@@ -656,6 +551,7 @@ function addOutputs(root_obj, workflow_name){
             root_obj.addOutput(value.inputs.Name.value, value.inputs.type.value);
         }
     }
+    organizeOutputs(root_obj, workflow_name);
 }
 
 // change
@@ -699,8 +595,6 @@ function hideWidget(
         }   
     }
 
-
-  
     // Hide any linked widgets, e.g. seed+seedControl
     if (widget.linkedWidgets) {
       for (const w of widget.linkedWidgets) {
@@ -709,27 +603,11 @@ function hideWidget(
     }
   }
 
-  
-  function getWidgetType(config) {
-    // Special handling for COMBO so we restrict links based on the entries
-    let type = config[0]
-    if (type instanceof Array) {
-      type = 'COMBO'
-    }
-    return { type }
-  }
-
-  const GET_CONFIG = Symbol()
-
   export function convertToInput(
     node,
-    widget,
-    config
+    widget
   ) {
     hideWidget(node, widget)
-  
-    const { type } = getWidgetType(config)
-  
     // Add input and store widget config for creating on primitive node
     const [oldWidth, oldHeight] = node.size
 
@@ -744,34 +622,358 @@ function hideWidget(
     ])
     return node
   }
-  
-export function addInputs(root_obj, inputs, widgets_values){
-    
 
-    let start_index = 2;
-    for (let [key, value] of Object.entries(inputs)){
-        const isinput = root_obj.inputs.find(i => i.name == value.inputs[0]);
-        const isWidget = root_obj.widgets.find(w => w.name == value.inputs[0]);
+export function getDefaultOptions(type, value = 0){
+    let options = {};
+    switch(type){
+        case "INT":
+            options = {default: value, "min": 0, "max": 18446744073709551616, "step": 1};
+            break;
+        case "FLOAT":
+            options = {default: value, "min": 0.00, "max": 2048.00, "step": 0.01};
+            break;
+        default:
+            options = {};
+    }
+    return options;
+}
+
+  
+export function addInputs(node, inputs, widgets_values, initial = false) {
+    // Phase 1: Préparer les données triées et simplifiées
+    const mapped_input = Object.entries(inputs)
+        .sort(([, a], [, b]) => a.position - b.position)
+        .map(([, input], index) => {
+            return {
+                name: input.inputs[0],
+                type: input.inputs[1],
+                value: input.inputs.length > 2 ? input.inputs[2] : undefined,
+                orderIndex: index // Ajouter un index d'ordre basé sur la position
+            };
+        });
+
+    // Séparer les inputs pour un traitement différencié
+    const widget_inputs = mapped_input.filter(input => input.value !== undefined && input.value !== null);
+    const pure_inputs = mapped_input.filter(input => input.value === undefined || input.value === null);
+    
+    // S'assurer que le nœud a un objet local_input_defs
+    if (!node.local_input_defs) {
+        node.local_input_defs = {
+            required: {},
+            optional: {}
+        };
+    }
+
+    // Phase 2: Ajouter les nouveaux widgets/inputs avec leur index d'ordre
+    for (const input of mapped_input) {
+        const { name, type, value, orderIndex } = input;
+        let isWidget = node.widgets.find(w => w.name === name);
+        let isinput = node.inputs.find(i => i.name === name);
         
-        if (!isWidget && (!isinput||isinput.widget)){
-            if (value.inputs[2]){
-                const values = widgets_values[start_index] ?? value.inputs[2];
-                const widget_param = {value: values, type: value.inputs[1]}
-                //const widget_param = {value: widgets_values[start_index], type: value.inputs.default.type}
-                addWidgets(root_obj, value.inputs[0], widget_param, app);
-                if (isinput){
-                    //node.removeInput(node.inputs.findIndex((i) => i.widget?.name === widget.name))
-                    const config = [value.inputs[2]]
-                    convertToInput(root_obj, root_obj.widgets[start_index], config)
+        if (!isWidget && (!isinput || isinput.widget)) {
+            if (value !== undefined) {
+                // Ajouter un widget avec sa valeur et son index d'ordre
+                const widget_param = { value, type };
+                addWidgets(node, name, widget_param, app);
+                isWidget = node.widgets.find(w => w.name === name);
+                isWidget.orderIndex = orderIndex; // Stocker l'index d'ordre
+                
+                if (isinput && !isinput.widget) {
+                    convertToInput(node, isWidget);
+                    // Préserver l'index d'ordre sur l'input converti
+                    const newInput = node.inputs.find(i => i.name === name);
+                    if (newInput) newInput.orderIndex = orderIndex;
+                    newInput.pos = isWidget.pos;
                 }
-                start_index += 1;
-            }else{
-                const input_param = {type: value.inputs[1]};
-                addWidgets(root_obj, value.inputs[0], input_param, app);
+            } else {
+                // C'est un input pur
+                if (!isinput) {
+                    node.addInput(name, type);
+                    const newInput = node.inputs[node.inputs.length - 1];
+                    newInput.orderIndex = orderIndex; // Stocker l'index d'ordre
+                }
+            }
+        } else {
+            // Mettre à jour l'index d'ordre des éléments existants
+            if (isWidget) isWidget.orderIndex = orderIndex;
+            if (isinput) isinput.orderIndex = orderIndex;
+        }
+    }
+
+    // Phase 3: Mettre à jour les types si nécessaires
+    for (const input of mapped_input) {
+        const { name, type, value } = input;
+        let isWidget = node.widgets.find(w => w.name === name);
+        let isinput = node.inputs.find(i => i.name === name);
+        
+        if (isWidget || isinput) {
+            const localType = node.local_input_defs?.required[name] || null;
+            
+            // Vérifier si le type est différent et le mettre à jour
+            if (localType && localType[0] !== type) {
+                if (isinput) {
+                    if (isinput.link) {
+                        node.graph.removeLink(isinput.link);
+                    }
+                    isinput.type = type;
+                }
+                
+                if (isWidget) {
+                    isWidget.type = type;
+                    const options = getDefaultOptions(type, value);
+                    node.local_input_defs.required[name] = [type, options];
+                    isWidget.options = options;
+                    isWidget.value = value !== undefined ? value : isWidget.value;
+                }
+            }
+        }
+    }
+    
+    // Phase 4: Réorganiser les widgets selon leur index d'ordre
+    // Séparer les widgets système (les 2 premiers) des widgets à trier
+    const systemWidgets = node.widgets.slice(0, 2);
+    const sortableWidgets = node.widgets.slice(2);
+    
+    // Trier les widgets par index d'ordre
+    sortableWidgets.sort((a, b) => {
+        if (a.orderIndex === undefined) return 1;
+        if (b.orderIndex === undefined) return -1;
+        return a.orderIndex - b.orderIndex;
+    });
+    
+    // Reconstruire le tableau des widgets
+    node.widgets = [...systemWidgets, ...sortableWidgets];
+    
+    // Maintenant ajuster les positions visuelles des widgets
+    for (let i = 2; i < node.widgets.length; i++) {
+        node.widgets[i].y = node.widgets[i-1].y + (node.widgets[i-1].computedHeight || LiteGraph.NODE_WIDGET_HEIGHT);
+        node.widgets[i].last_y = node.widgets[i].y;
+    }
+    
+    // Réorganiser les inputs purs
+    for (let i = 0; i < pure_inputs.length; i++) {
+        const targetInput = pure_inputs[i];
+        const actualIndex = node.inputs.findIndex(input => input.name === targetInput.name);
+        
+        if (actualIndex !== -1) {
+            // const actualIndex = node.inputs.indexOf(pureNodeInputs[inputIndex]);
+            const expected_position = i;
+            
+            if (actualIndex !== expected_position) {
+                // Déconnecter temporairement le lien s'il existe
+                let link = null;
+                if (node.inputs[actualIndex].link) {
+                    link = node.graph.links[node.inputs[actualIndex].link];
+                    node.graph.removeLink(node.inputs[actualIndex].link);
+                }
+                
+                // Sauvegarder les propriétés importantes
+                const inputToMove = node.inputs[actualIndex];
+                const inputName = inputToMove.name;
+                const inputType = inputToMove.type;
+                const inputWidget = inputToMove.widget;
+                const inputPos = inputToMove.pos;
+                
+                // Supprimer l'input
+                node.removeInput(actualIndex);
+                
+                // Ajouter à la position attendue
+                node.addInput(inputName, inputType, {pos: inputPos, widget: inputWidget}, expected_position);
+                
+                // Reconnecter le lien si nécessaire
+                if (link && link.origin_id !== null) {
+                    const newIndex = node.inputs.findIndex(input => input.name === targetInput.name);
+                    link.target_slot = newIndex;
+                    node.graph.links[link.id] = link;
+                    node.inputs[newIndex].link = link.id;
+                }
             }
         }
     }
 
+    // Phase 6: S'assurer que les inputs avec widget sont toujours à la fin de la liste
+    const inputsWithWidgets = [];
+    const inputsWithoutWidgets = [];
+
+    // 1. Trier les inputs en deux groupes
+    for (let i = 0; i < node.inputs.length; i++) {
+        if (node.inputs[i].widget) {
+            inputsWithWidgets.push(i);
+        } else {
+            inputsWithoutWidgets.push(i);
+        }
+    }
+
+    // 2. Si des inputs avec widgets ne sont pas déjà à la fin, les réorganiser
+    if (inputsWithWidgets.length > 0 && inputsWithWidgets[0] < inputsWithoutWidgets[inputsWithoutWidgets.length - 1]) {
+        // Déplacer tous les inputs avec widgets à la fin
+        for (let i = 0; i < inputsWithWidgets.length; i++) {
+            const currentIndex = inputsWithWidgets[i] - i; // Ajuster l'index car la liste change à chaque suppression
+            
+            // Sauvegarder les informations de l'input et son lien
+            let link = null;
+            if (node.inputs[currentIndex].link) {
+                let link = null;
+                if (node.inputs[actualIndex].link) {
+                    link = node.graph.links[node.inputs[actualIndex].link];
+                    node.graph.removeLink(node.inputs[actualIndex].link);
+                }
+            }
+            
+            // Sauvegarder les propriétés importantes
+            const inputToMove = node.inputs[currentIndex];
+            const inputName = inputToMove.name;
+            const inputType = inputToMove.type;
+            const inputWidget = inputToMove.widget;
+            const inputPos = inputToMove.pos;
+            
+            node.removeInput(currentIndex);
+            node.addInput(inputName, inputType, {pos: inputPos, widget: inputWidget});
+            
+            // Reconnecter le lien si nécessaire
+            if (link && link.origin_id !== null) {
+                const newIndex = node.inputs.findIndex(input => input.name === inputName);
+                if (node.graph)
+                    node.graph.links[link.id].target_slot = newIndex;
+                    node.inputs[expected_position].link = link.id;
+                    
+            }
+            if (link && link.origin_id !== null) {
+                const newIndex = node.inputs.findIndex(input => input.name === inputName);
+                link.target_slot = newIndex;
+                node.graph.links[link.id] = link;
+                node.inputs[newIndex].link = link.id;
+            }
+
+        }
+        
+        // Rafraîchir le canvas
+        if (node.graph) {
+            node.graph.setDirtyCanvas(true);
+        }
+    }
+    
+    // Rafraîchir le canvas si nécessaire
+    if (node.graph) {
+        node.graph.setDirtyCanvas(false, true);
+        //node.graph.afterChange();
+        node.graph.connectionChange(this);
+    }
+}
+
+export function organizeOutputs(node, workflow_name) {
+    const outputs = app.lipsync_studio[workflow_name].outputs;
+    
+    // Extraire et trier les outputs selon leur position
+    const sortedOutputs = Object.entries(outputs)
+        .sort(([, a], [, b]) => a.position - b.position)
+        .map(([, output]) => ({
+            name: output.inputs.Name.value,
+            type: output.inputs.type.value
+        }));
+    
+    // Réorganiser les outputs selon l'ordre déterminé
+    for (let i = 0; i < sortedOutputs.length; i++) {
+        const targetOutput = sortedOutputs[i];
+        const actualIndex = node.outputs.findIndex(output => output.name === targetOutput.name);
+        
+        if (actualIndex !== -1 && actualIndex !== i) {
+            // Sauvegarder les liens existants
+            let links = [];
+            if (node.outputs[actualIndex].links && node.outputs[actualIndex].links.length > 0) {
+                for (const linkId of node.outputs[actualIndex].links) {
+                    const linkInfo = node.graph.links[linkId];
+                    if (linkInfo) {
+                        links.push({
+                            id: linkId,
+                            target_id: linkInfo.target_id,
+                            target_slot: linkInfo.target_slot
+                        });
+                        // Déconnecter temporairement
+                        node.graph.removeLink(linkId);
+                    }
+                }
+            }
+            
+            // Sauvegarder les propriétés importantes
+            const outputToMove = node.outputs[actualIndex];
+            const outputName = outputToMove.name;
+            const outputType = outputToMove.type;
+            
+            // Supprimer l'output
+            node.removeOutput(actualIndex);
+            
+            // Ajouter à la position attendue
+            node.addOutput(outputName, outputType, i);
+            
+            // Reconnecter les liens sauvegardés
+            for (const link of links) {
+                node.graph.connect(node.id, i, link.target_id, link.target_slot);
+            }
+        }
+    }
+    
+    // Rafraîchir le canvas
+    if (node.graph) {
+        node.graph.setDirtyCanvas(true);
+    }
+}
+
+
+export function removeInputs(node, inputs, widgets_values){
+    // Ensemble des noms d'entrées valides à partir de inputs
+    const validInputNames = new Set();
+    for (let [key, value] of Object.entries(inputs)) {
+        if (value.inputs && value.inputs[0]) {
+            validInputNames.add(value.inputs[0]);
+        }
+    }
+    
+    // Noms à préserver quoi qu'il arrive
+    const preserveNames = new Set(["workflows", "workflow"]);
+    
+    // Collecter les noms d'entrées actuelles
+    const currentInputNames = new Set();
+    for (let input of node.inputs)
+        if (!preserveNames.has(input.name))
+            currentInputNames.add(input.name);
+    
+    // Collecter les noms de widgets actuels (à partir de l'index 2)
+    const currentWidgetNames = new Set();
+    for (let i = 2; i < node.widgets.length; i++)
+        if (!preserveNames.has(node.widgets[i].name))
+            currentWidgetNames.add(node.widgets[i].name);
+    
+    // Identifier les éléments à supprimer (ceux qui sont dans current mais pas dans valid)
+    const inputsToRemove = [...currentInputNames].filter(name => !validInputNames.has(name));
+    const widgetsToRemove = [...currentWidgetNames].filter(name => !validInputNames.has(name));
+    
+    // Supprimer les entrées identifiées (en parcourant en sens inverse)
+    if (inputsToRemove.length > 0)
+        for (let i = node.inputs.length - 1; i >= 0; i--)
+            if (inputsToRemove.includes(node.inputs[i].name)){
+                // Déconnecter le lien s'il existe
+                if (node.inputs[i].link != null)
+                    node.graph.removeLink(node.inputs[i].link);
+                node.removeInput(i);
+            }
+    
+    // Supprimer les widgets identifiés (en parcourant en sens inverse)
+    if (widgetsToRemove.length > 0)
+        for (let i = node.widgets.length - 1; i >= 2; i--)
+            if (widgetsToRemove.includes(node.widgets[i].name)) {
+                widgetName = node.widgets[i].name;
+                node.widgets.splice(i, 1);
+                widgets_values.splice(i, 1);
+                if (node.local_input_defs && node.local_input_defs.required[widgetName]){
+                    delete node.local_input_defs.required[widgetName];
+                }
+                // change y and last_y of widgets
+                for (let j = i; j < node.widgets.length; j++){
+                    node.widgets[j].y -= node.widgets[j].computedHeight;
+                    node.widgets[j].last_y -= node.widgets[j].computedHeight;
+                }
+            }
 }
 
 app.registerExtension({
@@ -785,71 +987,37 @@ app.registerExtension({
 			case "Workflow":
                 nodeType.prototype.onNodeCreated =  function() {
                     chainCallback(this, "onConfigure", function(info) {
-                        //let widgetDict = info.widgets_values
                         if (info.widgets_values[0] != "None"){
-                                //this.widgets[1].value = importWorkflow(this, info.widgets_values[0], app, nodeData)
-                            //if (this.widgets.length==2){
-                                const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
-                                addInputs(this, inputs, info.widgets_values);
-                                addOutputs(this, info.widgets_values[0]);
-                                importWorkflow(this, info.widgets_values[0], app, nodeData)
-                                    .then(data => {
-                                        if (data){
-                                            this.widgets[1].value = data;
-                                            const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
-                                            addInputs(this, inputs, info.widgets_values);
-                                            addOutputs(this, info.widgets_values[0]);
-                                            //importWorkflow(this, info.widgets_values[0], app, nodeData)
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Erreur lors de l\'importation:', error);
-                                    });
-
-                                /*
-                                if (info.widgets_values[1] != this.widgets[1].value){
-                                    this.widgets[1].value = info.widgets_values[1];
-                                }
-                                const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
-
-                                let start_index = 2;
-                                for (let [key, value] of Object.entries(inputs)){
-                                    const isinput = this.inputs.find(i => i.name == value.inputs.Name.value);
-                                    const isWidget = this.widgets.find(w => w.name == value.inputs.Name.value);
-                                    if (!isWidget && (!isinput||isinput.widget)){
-                                        const widget_param = {value: info.widgets_values[start_index], type: value.inputs.default.type}
-                                        addWidgets(this, value.inputs.Name.value, widget_param, app, nodeData);
-                                        if (isinput){
-                                            //node.removeInput(node.inputs.findIndex((i) => i.widget?.name === widget.name))
-                                            const config = [value.inputs.default.type]
-                                            convertToInput(this, this.widgets[start_index], config)
-                                        }
-                                        start_index += 1;
+                            const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
+                            
+                            addInputs(this, inputs, info.widgets_values);
+                            addOutputs(this, info.widgets_values[0]);
+                            removeInputs(this, inputs, info.widgets_values);
+                            fitHeight(this);
+                            importWorkflow(this, info.widgets_values[0], app, nodeData)
+                                .then(data => {
+                                    if (data){
+                                        this.widgets[1].value = data;
+                                        const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
+                                        
+                                        addInputs(this, inputs, info.widgets_values);
+                                        addOutputs(this, info.widgets_values[0]);
+                                        removeInputs(this, inputs, info.widgets_values);
+                                        fitHeight(this);
+                                        //importWorkflow(this, info.widgets_values[0], app, nodeData)
                                     }
-                                }*/
-                            //}
-                            /* 
-                            if(info.widgets_values[0] != "None")
-                                api.fetchApi("/flowchain/workflow?workflow_path="+info.widgets_values[0])
-                                    .then(response => response.json())
-                                    .then(async data => {
-                                        cleanInputs(this);
-                                        app.lipsync_studio[info.widgets_values[0]] = data;
-                                        addInputs(this, info.widgets_values[0], info.widgets_values);
-                                    })
-                                    .catch(error => {
-                                        console.error('Erreur lors de l\'importation:', error);
-                                    });*/
+                                })
+                                .catch(error => {
+                                    console.error('Erreur lors de l\'importation:', error);
+                                });
                         }
                     });
                     
                     chainCallback(this, "onSerialize", function(info) {
-                        for (let w of this.inputs){
-                            // if w.name exists in info.widgets_values
-
-                            if (w.widget){
-                                if (w.type != this.local_input_defs.required[w.name][0])
-                                    w.type = this.local_input_defs.required[w.name][0];
+                        for (let inp of this.inputs){
+                            if (inp.widget){
+                                if (inp.type != this.local_input_defs.required[inp.name][0])
+                                    inp.type = this.local_input_defs.required[inp.name][0];
                             }
                         }
                         if(this.widgets[0].options.values == "COMBO"){
@@ -857,8 +1025,6 @@ app.registerExtension({
                         }
                     });
                     const workflow_reload = this.title.startsWith("Workflow: ")?true:false;
-                    
-                    // nodeData.input.required.workflows = ["COMBO", {values:["None", ...Object.keys(app.lipsync_studio)]}]
                     this.widgets[0].options.values = ["None", ...Object.keys(app.lipsync_studio)]
                     this.widgets[0].callback =  ( value ) => {
                         cleanInputs(this);
@@ -867,8 +1033,9 @@ app.registerExtension({
                         }else{
                             this.widgets[1].value = importWorkflow(this, value, app, nodeData);
                             const inputs = app.lipsync_studio[value].inputs;
-                            addInputs(this, inputs, {});
+                            addInputs(this, inputs, {}, true);
                             addOutputs(this, value);
+                            fitHeight(this);
                         }
                     };
                     if (!workflow_reload){
@@ -890,99 +1057,9 @@ app.registerExtension({
 
                         inputs["default"] = {
                             inputs: ["default", info.widgets_values[1], info.widgets_values[2]]
-                                /*
-                                default:{value: info.widgets_values[2], type: info.widgets_values[1]},
-                                Name: {value: "default", type: "STRING"},
-                                type: {value: info.widgets_values[1], type: "COMBO"}*/
                         };
 
                         addInputs(this, inputs, info.widgets_values);
-                        /*
-                        const inputs = {};
-                        for (let [k, value] of Object.entries(info.widgets_values)) {
-                            if (k == "default"){
-                                inputs[k] = {
-                                    inputs: {
-                                        default:{value: value.value, type: info.widgets_values.default.type}, 
-                                        Name: {value: k, type: "STRING"},
-                                        type: {value: info.widgets_values.default.type, type: "STRING"}
-                                    }
-                                };
-                            }else{
-                                inputs[k] = {
-                                    inputs: {
-                                        default:{value: value.value, type: value.type}, 
-                                        Name: {value: k, type: value.type},
-                                        type: {value: value.type, type: value.type}
-                                    }
-                                };
-                            }
-                        }
-                        let widgetDict = {};
-                        if(info.widgets_values.default)
-                            widgetDict = [info.widgets_values.Name.value, info.widgets_values.default.type, info.widgets_values.default.value];
-                        else
-                            widgetDict = [info.widgets_values.Name.value, info.widgets_values.type.value];
-
-                        addInputs(this, inputs, widgetDict);*/
-                        /*if (info.widgets_values.length == undefined) {
-                            
-                            
-                            for (let w of this.widgets) {
-                                if (w.name in widgetDict) {
-                                    w.value = widgetDict[w.name].value;
-                                }
-                            }
-
-                            // check if widgetDict in this.widgets
-                            for (let [key, value] of Object.entries(widgetDict)) {
-                                let widget = this.widgets.find(w => w.name === key);
-                                let type = this.widgets.find(w => w.name === "type");
-                                if(!widget){
-                                    let widget_param = {}
-                                    if (value.name == "default"){
-                                        widget_param = {value: value.value, type: type.value}
-                                    }else{
-                                        widget_param = value;
-                                    }
-                                    // addWidgets(this, key, widget_param, app);
-                                    addInputs(this, {inputs: {Name: {value: key}, type: {value: type.value}}}, widgetDict);
-                                    widget = this.widgets.find(w => w.name === key);
-                                }
-                                    //this.widgets.push(value);
-                                widget.options = info.widgets_values[key].options;
-                                widget.value = info.widgets_values[key].value;
-                                //if value exists in inputs
-
-                                for (let input of this.inputs){
-                                    if (input.name == key){
-                                        //find if key exists in inputs array in inputs.Name
-                                        if (info.widgets_values[key].type != "converted-widget"){
-                                            this.removeInput(this.inputs.indexOf(input));
-                                        }
-                                        break;
-                                    }
-                                }
-
-                            }
-                        }
-                        // get inputs by name
-
-                        for (let w of this.inputs){
-                            if (w.name=="default"){
-                                w.type = info.widgets_values.type.value;
-                            }
-                        }
-                        if (info.outputs_values != undefined){
-                            // deep copy outputs
-                            if(this.id == -1){
-                                this.outputs[0] = {links: null, name: info.outputs_values.name, type: info.outputs_values.type};
-                            }else{
-                                this.outputs[0] = {...info.outputs_values};
-                            }
-                        }
-                        this.setSize(info.size);*/
-
                     });
                     chainCallback(this, "onSerialize", function(info) {
                         let widgetDict = info.widgets_values;
@@ -998,68 +1075,9 @@ app.registerExtension({
                                 }
                             }
                         }
-                        /*
-                        info.widgets_values = {};
-                        if (!this.widgets) {
-                            return;
-                        }
-
-                        for (let w of this.widgets) {
-                            if (w.name == "default"){
-                                const default_type = this.inputs.find(i => i.name == "default");
-                                if (default_type)
-                                    info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: default_type.type};
-                                else
-                                    info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: info.widgets_values.type.value};
-                            }else{
-                                info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type};
-                            }
-                        }*/
-                        /*
-                        for (let w of this.inputs){
-                            // if w.name exists in info.widgets_values
-                            if (info.widgets_values[w.name]){
-                                w.type = info.widgets_values[w.name].type;
-                                if(info.widgets_values[w.name].type == "converted-widget"){
-                                    if(info.widgets_values[w.name].origType == "toggle"){
-                                        w.type = "BOOLEAN";
-                                    }else if(info.widgets_values[w.name].origType == "text"){
-                                        w.type = "STRING";
-                                    }
-                                }
-                            }
-                        }
-                        // deep copy outputs without reference
-                        if (this.outputs.length > 0){
-                            if (this.outputs[0].links == null){
-                                info.outputs_values = {links: null, name: this.outputs[0].name, type: this.outputs[0].type};
-                            }else{
-                                info.outputs_values = {links: [...this.outputs[0].links], name: this.outputs[0].name, slot_index: this.outputs[0].slot_index, type: this.outputs[0].type};
-                            }
-                        }
-                            
-                        this.setSize(info.size);*/
                     });
 
                     this.widgets[1].callback =  ( value ) => {
-                        // D'abord, déconnecter tous les liens existants
-                        /*for (let i = 0; i < this.outputs.length; i++) {
-                            const output = this.outputs[i];
-                            if (output.links && output.links.length) {
-                                const links = output.links.slice();
-                                for (const linkId of links) {
-                                    this.graph.removeLink(linkId);
-                                }
-                            }
-                        }
-                        
-                        for (let i = 0; i < this.inputs.length; i++) {
-                            const input = this.inputs[i];
-                            if (input.link) {
-                                this.graph.removeLink(input.link);
-                            }
-                        }
-                        clearInputs(this);*/
                         cleanInputs(this);
 
                         switch(value){

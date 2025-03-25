@@ -5,6 +5,37 @@ import json
 import folder_paths
 from app.user_manager import UserManager
 
+def get_workflow_data(workflow_file):
+    nodes_input = {}
+    nodes_output = {}
+
+    if "nodes" in workflow_file:
+        # Extraire les nœuds WorkflowInput et WorkflowOutput
+        for node in workflow_file["nodes"]:
+            if node.get("type") == "WorkflowInput":
+                # Convertir au format compatible pour le client
+                node_id = str(node.get("id", "unknown"))
+                nodes_input[node_id] = {
+                    "class_type": "WorkflowInput",
+                    "inputs": node.get("widgets_values", {}),
+                    "position": node.get("pos", {})[1]
+                }
+            elif node.get("type") == "WorkflowOutput":
+                node_id = str(node.get("id", "unknown"))
+                nodes_output[node_id] = {
+                    "class_type": "WorkflowOutput",
+                    "inputs": node.get("widgets_values", {}),
+                    "position": node.get("pos", {})[1]
+                }
+        # sort by position
+        nodes_input = dict(sorted(nodes_input.items(), key=lambda item: item[1]["position"]))
+        nodes_output = dict(sorted(nodes_output.items(), key=lambda item: item[1]["position"]))
+
+    if nodes_input or nodes_output:
+        # Créer une clé unique basée sur le chemin relatif
+        return {"inputs": nodes_input,
+                "outputs": nodes_output,
+                'workflow': workflow_file}
 
 @server.PromptServer.instance.routes.get("/flowchain/workflows")
 async def workflows(request):
@@ -24,45 +55,9 @@ async def workflows(request):
 
                         with open(file_path, "r", encoding="utf-8") as f:
                             json_content = json.load(f)
-
-                        nodes_input = {}
-                        nodes_output = {}
-
-
-                        # Vérifier le format du workflow (API ou standard)
-                        if "nodes" in json_content:
-                            # Format standard (non-API)
-                            is_standard_format = True
-
-                            # Extraire les nœuds WorkflowInput et WorkflowOutput
-                            for node in json_content["nodes"]:
-                                if node.get("type") == "WorkflowInput":
-                                    # Convertir au format compatible pour le client
-                                    node_id = str(node.get("id", "unknown"))
-                                    nodes_input[node_id] = {
-                                        "class_type": "WorkflowInput",
-                                        "inputs": node.get("widgets_values", {})
-                                    }
-                                elif node.get("type") == "WorkflowOutput":
-                                    node_id = str(node.get("id", "unknown"))
-                                    nodes_output[node_id] = {
-                                        "class_type": "WorkflowOutput",
-                                        "inputs": node.get("widgets_values", {})
-                                    }
-                        else:
-                            # Format API
-                            nodes_input = {k: v for k, v in json_content.items() if
-                                           v.get("class_type") == "WorkflowInput"}
-                            nodes_output = {k: v for k, v in json_content.items() if
-                                            v.get("class_type") == "WorkflowOutput"}
-
-                        # Ajouter au résultat seulement si le fichier contient des nœuds WorkflowInput ou WorkflowOutput
-                        if nodes_input or nodes_output:
-                            # Créer une clé unique basée sur le chemin relatif
-                            relative_path = os.path.relpath(file_path, json_path)
-                            result[relative_path] = {"inputs": nodes_input,
-                                                     "outputs": nodes_output,
-                                                     'workflow': json_content}
+                        relative_path = os.path.relpath(file_path, json_path)
+                        result[relative_path] = get_workflow_data(json_content)
+                        
                     except json.JSONDecodeError:
                         # Ignorer les fichiers JSON mal formés
                         print(f"Ignoring malformed JSON file: {file_path}")
@@ -88,45 +83,15 @@ async def workflow(request):
     unversal_path = original_path.replace("\\", "/")
     json_path = unversal_path.split("/")
     if ".json" in json_path[-1]:
-        file_name = json_path[-1]
+        #file_name = json_path[-1]
         json_path = folder_paths.user_directory + "/" + user + "/workflows/" + unversal_path
+
 
     if os.path.exists(json_path):
         with open(json_path, "r", encoding="utf-8") as f:
             json_content = json.load(f)
 
-        nodes_input = {}
-        nodes_output = {}
-
-        # Vérifier le format du workflow (API ou standard)
-        if "nodes" in json_content:
-            # Extraire les nœuds WorkflowInput et WorkflowOutput
-            for node in json_content["nodes"]:
-                if node.get("type") == "WorkflowInput":
-                    # Convertir au format compatible pour le client
-                    node_id = str(node.get("id", "unknown"))
-                    nodes_input[node_id] = {
-                        "class_type": "WorkflowInput",
-                        "inputs": node.get("widgets_values", {})
-                    }
-                elif node.get("type") == "WorkflowOutput":
-                    node_id = str(node.get("id", "unknown"))
-                    nodes_output[node_id] = {
-                        "class_type": "WorkflowOutput",
-                        "inputs": node.get("widgets_values", {})
-                    }
-        else:
-            # Format API
-            nodes_input = {k: v for k, v in json_content.items() if
-                           v.get("class_type") == "WorkflowInput"}
-            nodes_output = {k: v for k, v in json_content.items() if
-                            v.get("class_type") == "WorkflowOutput"}
-
-        # Ajouter au résultat seulement si le fichier contient des nœuds WorkflowInput ou WorkflowOutput
-        if nodes_input or nodes_output:
-            result = {"inputs": nodes_input,
-                     "outputs": nodes_output,
-                     'workflow': json_content}
+        result = get_workflow_data(json_content)
     else:
         result = {"error": "File not found"}
 

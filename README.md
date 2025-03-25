@@ -58,7 +58,7 @@ Warning and know issue:
 
 ## 🔗 requirements
 
-- **comfyui**: Be sure to have a **ComfyUI front-end** version of at least **1.3.11**. If not, update ComfyUI to the latest version. To find the front-end version, go to ComfyUI settings (the gear icon), click "About," and check the version at the top of the page.
+- **comfyui**: Be sure to have a **ComfyUI front-end** version of at least **1.11.8**. If not, update ComfyUI to the latest version. To find the front-end version, go to ComfyUI settings (the gear icon), click "About," and check the version at the top of the page.
 
 ## 💻 Installation
 
