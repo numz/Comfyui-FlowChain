@@ -639,6 +639,7 @@ function addWidgets(root_obj, field_name, value, app){
         // Stocker la définition localement 
         root_obj.local_input_defs.required[field_name] = ["STRING", {}];
     }
+    if (type == "IMAGE") root_obj.addInput(field_name, "IMAGE");
     if (type == "LATENT") root_obj.addInput(field_name, "LATENT");
     if (type == "MODEL") root_obj.addInput(field_name, "MODEL");
     if (type == "CLIP") root_obj.addInput(field_name, "CLIP");

@@ -95,7 +95,7 @@ After this command be created folder Comfyui-FlowChain
 
 |                                                   | Name                |                                                 Description                                                  | ComfyUI category |
 |:-------------------------------------------------:|:--------------------|:------------------------------------------------------------------------------------------------------------:|:----------------:|
-| <img src="docs/assets/workflow.png" width="100%"> | _Workflow_          | Node that allows loading workflows in API format. It will show Inputs and Outputs into the loaded Workflows  |   FlowChain ⛓️   |
+| <img src="docs/assets/workflow.png" width="100%"> | _Workflow_          | Node that allows loading workflows. It will show Inputs and Outputs into the loaded Workflows                |   FlowChain ⛓️   |
 |  <img src="docs/assets/Input.png" width="100%">   | _Workflow Input_    |                              Node used to declare the inputs of your workflows.                              |   FlowChain ⛓️   |
 |  <img src="docs/assets/output.png" width="100%">  | _Workflow Output_   |                             Node used to declare the outputs of your workflows.                              |   FlowChain ⛓️   |
 | <img src="docs/assets/Continue.png" width="100%"> | _Workflow Continue_ |                                 Node to stop/Continue the workflow process.                                  |   FlowChain ⛓️   |
