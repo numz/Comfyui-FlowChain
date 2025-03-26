@@ -54,7 +54,6 @@ def recursive_delete(workflow, to_delete):
 
 class Workflow(SaveImage):
     def __init__(self):
-        self.logger = Logger()
         self.ws = None
 
     @classmethod
