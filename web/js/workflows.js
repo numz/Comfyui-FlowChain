@@ -87,7 +87,7 @@ async function convertWorkflowToApiFormat(standardWorkflow) {
     }
 }
 
-export async function importWorkflow(root_obj, workflow_path, app, nodeData, reset_values=true){
+export async function importWorkflow(root_obj, workflow_path, app){
     const filename = workflow_path.replace(/\\/g, '/').split("/");
     root_obj.title = "Workflow: "+filename[filename.length-1].replace(".json", "").replace(/_/g, " ");
     

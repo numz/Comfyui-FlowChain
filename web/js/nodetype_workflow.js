@@ -12,7 +12,7 @@ function initialisation(node) {
         if (value == "None"){
             node.title = "Workflow (FlowChain ⛓️)";
         }else{
-            node.widgets[1].value = importWorkflow(node, value, app, nodeData);
+            node.widgets[1].value = importWorkflow(node, value, app);
             const inputs = app.lipsync_studio[value].inputs;
             addInputs(node, inputs, {}, true);
             addOutputs(node, value);
@@ -37,7 +37,7 @@ function configure(info) {
         addOutputs(this, info.widgets_values[0]);
         removeInputs(this, inputs, info.widgets_values);
         fitHeight(this);
-        importWorkflow(this, info.widgets_values[0], app, nodeData)
+        importWorkflow(this, info.widgets_values[0], app)
             .then(data => {
                 if (data){
                     this.widgets[1].value = data;
@@ -47,7 +47,6 @@ function configure(info) {
                     addOutputs(this, info.widgets_values[0]);
                     removeInputs(this, inputs, info.widgets_values);
                     fitHeight(this);
-                    //importWorkflow(this, info.widgets_values[0], app, nodeData)
                 }
             })
             .catch(error => {
