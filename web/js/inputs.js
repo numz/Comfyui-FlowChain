@@ -317,7 +317,7 @@ export function addInputs(node, inputs, widgets_values, initial = false) {
     if (node.graph) {
         node.graph.setDirtyCanvas(false, true);
         //node.graph.afterChange();
-        node.graph.connectionChange(this);
+        //node.graph.connectionChange(node);
     }
 }
 
