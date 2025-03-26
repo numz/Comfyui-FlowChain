@@ -77,9 +77,43 @@ class Workflow(SaveImage):
     OUTPUT_NODE = True
 
     @classmethod
-    def IS_CHANGED(s, workflows, **kworgs):
+    def IS_CHANGED(s, workflows, workflow, **kwargs):
         m = hashlib.sha256()
         m.update(workflows.encode())
+
+        # Ajouter le contenu du workflow au hash pour détecter les changements de structure
+        if workflow:
+            workflow_data = json.loads(workflow)
+
+            # Extraire les nœuds de sortie avec leurs positions/types/connexions
+            outputs = {}
+            for k, v in workflow_data.items():
+                if v.get('class_type') == 'WorkflowOutput':
+                    # Capturer le nom, type et la source de données (connexions entrantes)
+                    output_info = {
+                        'name': v['inputs']['Name'],
+                        'type': v['inputs']['type'],
+                        'position': v.get('_meta', {}).get('position', [0, 0]),
+                    }
+
+                    # Ajouter les connexions d'entrée pour tracer la provenance des données
+                    for input_name, input_value in v['inputs'].items():
+                        if isinstance(input_value, list) and len(input_value) > 0:
+                            # Stocker les IDs des nœuds connectés à cette sortie
+                            output_info[input_name + '_source'] = input_value
+
+                    outputs[k] = output_info
+
+            # Être sûr de préserver l'ordre des sorties dans le hash
+            # en les triant par position verticale
+            sorted_outputs = dict(sorted(
+                outputs.items(),
+                key=lambda item: item[1].get('position', [0, 0])[1]
+            ))
+
+            # Ajouter l'information des sorties au hash
+            m.update(json.dumps(sorted_outputs, sort_keys=True).encode())
+
         return m.digest().hex()
 
     def generate(self, workflows, workflow, **kwargs):
@@ -100,7 +134,7 @@ class Workflow(SaveImage):
                 if "default" not in value["inputs"]:
                     workflow[key]["inputs"]["default"] = torch.tensor([])
                 else:
-                    if not value["inputs"]["default"]:
+                    if value["inputs"]["default"].numel() == 0:
                         workflow[key]["inputs"]["default"] = torch.tensor([])
             return workflow
 
@@ -338,7 +372,42 @@ class Workflow(SaveImage):
         
         workflow, _ = get_recursive_workflow(workflow, 5000)
         workflow, workflow_outputs = clean_workflow(workflow, original_inputs, kwargs)
-        workflow_outputs_id = [k for k, v in workflow.items() if v["class_type"] == "WorkflowOutput"]
+        
+        # Accéder au fichier JSON original pour obtenir les positions correctes
+        workflow_file_path = os.path.join(folder_paths.user_directory, "default", "workflows", workflows)
+        original_positions = {}
+        
+        # Récupérer les positions des noeuds de sortie depuis le fichier original
+        
+        if os.path.exists(workflow_file_path):
+            try:
+                with open(workflow_file_path, "r", encoding="utf-8") as f:
+                    original_workflow = json.load(f)
+                    
+                # Créer un mapping node_id -> position pour les noeuds WorkflowOutput
+                if "nodes" in original_workflow:
+                    for node in original_workflow["nodes"]:
+                        if node.get("type") == "WorkflowOutput":
+                            node_id = str(node.get("id", "unknown"))
+                            pos_y = node.get("pos", [0, 0])[1]
+                            node_name = node.get("widgets_values", "")["Name"]["value"]
+                            original_positions[node_name] = pos_y
+            except Exception as e:
+                print(f"Erreur lors de la lecture du fichier workflow original: {str(e)}")
+        
+        # Récupérer les nœuds de sortie et les trier par position Y
+        workflow_outputs_with_position = []
+        for k, v in workflow_outputs.items():
+            output_name = v["inputs"]["Name"]
+            # Utiliser la position du fichier original si disponible, sinon utiliser une position par défaut
+            y_position = original_positions.get(output_name, 999999)
+            workflow_outputs_with_position.append((k, y_position))
+        
+        # Trier par position Y croissante
+        workflow_outputs_with_position.sort(key=lambda x: x[1])
+        
+        # Extraire seulement les IDs dans l'ordre trié
+        workflow_outputs_id = [k for k, _ in workflow_outputs_with_position]
 
         prompt_id = str(uuid.uuid4())
 
@@ -359,14 +428,15 @@ class Workflow(SaveImage):
         comfy.model_management.unload_all_models()
         gc.collect()
 
+        # Remplacer la boucle de génération d'output qui ne respecte pas l'ordre
         output = []
-        for id_node, node in workflow_outputs.items():
+        for id_node in workflow_outputs_id:  # Utiliser l'ordre trié des IDs
             if id_node in history_result["outputs"]:
                 result_value = history_result["outputs"][id_node]["default"]
                 # Apply formatting based on the expected output type
-                # formatted_value = format_output_value(result_value, node["inputs"]["type"])
                 output.append(result_value[0])
             else:
+                node = workflow_outputs[id_node]  # Récupérer le nœud correspondant à l'ID
                 if node["inputs"]["type"] == "IMAGE" or node["inputs"]["type"] == "MASK":
                     black_image_np = np.zeros((255, 255, 3), dtype=np.uint8)
                     black_image_pil = Image.fromarray(black_image_np)

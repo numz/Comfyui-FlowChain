@@ -42,13 +42,13 @@ def get_workflow_data(workflow_file):
 @server.PromptServer.instance.routes.get("/flowchain/workflows")
 async def workflows(request):
     user = UserManager().get_request_user_id(request)
-    json_path = folder_paths.user_directory + "/" + user + "/workflows/"
+    json_path = os.path.join(folder_paths.user_directory, user, "workflows")
     result = {}
 
     # Vérifier si le répertoire principal existe
     if os.path.exists(json_path):
         # Utiliser os.walk pour parcourir récursivement tous les sous-répertoires
-        for root, dirs, files in os.walk(json_path):
+        for root, dirs, files in os.walk(str(json_path)):
             for file in files:
                 # Ne traiter que les fichiers JSON
                 if file.lower().endswith('.json'):
@@ -57,7 +57,7 @@ async def workflows(request):
 
                         with open(file_path, "r", encoding="utf-8") as f:
                             json_content = json.load(f)
-                        relative_path = os.path.relpath(file_path, json_path)
+                        relative_path = os.path.relpath(file_path, str(json_path))
                         result[relative_path] = get_workflow_data(json_content)
 
                     except json.JSONDecodeError:

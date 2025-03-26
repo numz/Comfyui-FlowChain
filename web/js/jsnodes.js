@@ -1,10 +1,10 @@
 import { app } from "../../../scripts/app.js";
 import { api } from '../../../scripts/api.js'
-import { setupWorkflowNode } from './workflow.js';
-import { setupInputNode } from "./input.js";
-import { setupContinueNode } from "./continue.js";
-import { setupOutputNode } from "./output.js";
-import { setupLipSyncNode } from "./lipSync.js";
+import { setupWorkflowNode } from './nodetype_workflow.js';
+import { setupInputNode } from "./nodetype_input.js";
+import { setupContinueNode } from "./nodetype_continue.js";
+import { setupOutputNode } from "./nodetype_output.js";
+import { setupLipSyncNode } from "./nodetype_lipSync.js";
 
 app.registerExtension({
 	name: "FlowChain.jsnodes",
