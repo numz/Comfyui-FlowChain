@@ -14,7 +14,7 @@ function initialisation(node) {
         }else{
             node.widgets[1].value = importWorkflow(node, value, app);
             const inputs = app.lipsync_studio[value].inputs;
-            addInputs(node, inputs);
+            addInputs(node, inputs, []);
             addOutputs(node, value);
             fitHeight(node);
         }
@@ -33,7 +33,7 @@ function configure(info) {
     if (info.widgets_values[0] != "None"){
         const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
 
-        addInputs(this, inputs);
+        addInputs(this, inputs, info.widgets_values);
         addOutputs(this, info.widgets_values[0]);
         removeInputs(this, inputs, info.widgets_values);
         fitHeight(this);
@@ -43,7 +43,7 @@ function configure(info) {
                     this.widgets[1].value = data;
                     const inputs = app.lipsync_studio[info.widgets_values[0]].inputs;
 
-                    addInputs(this, inputs);
+                    addInputs(this, inputs, info.widgets_values);
                     addOutputs(this, info.widgets_values[0]);
                     removeInputs(this, inputs, info.widgets_values);
                     fitHeight(this);

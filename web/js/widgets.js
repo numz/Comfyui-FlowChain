@@ -10,6 +10,9 @@ export function getDefaultOptions(type, value = 0){
         case "FLOAT":
             options = {default: value, "min": 0.00, "max": 2048.00, "step": 0.01};
             break;
+        case "STRING":
+            options = {default: value};
+            break;
         default:
             options = {};
     }

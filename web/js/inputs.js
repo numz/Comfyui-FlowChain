@@ -99,7 +99,7 @@ export function addOutputs(root_obj, workflow_name){
 }
 
   
-export function addInputs(node, inputs) {
+export function addInputs(node, inputs, widgets_values) {
     // Phase 1: Préparer les données triées et simplifiées
     const mapped_input = Object.entries(inputs)
         .sort(([, a], [, b]) => a.position - b.position)
@@ -114,6 +114,21 @@ export function addInputs(node, inputs) {
 
     // Séparer les inputs pour un traitement différencié
     const widget_inputs = mapped_input.filter(input => input.value !== undefined && input.value !== null);
+    // replace value in widget_inputs with the value in widgets_values
+    if (widgets_values){
+        for (let i = 0; i < widget_inputs.length; i++) {
+            const widget_input = widget_inputs[i];
+            const widget_value = widgets_values[2 + i];
+            //find name in mapped_input and replace value
+            for (let j = 0; j < mapped_input.length; j++){
+                if (mapped_input[j].name == widget_input.name){
+                    mapped_input[j].value = widget_value;
+                    break;
+                }
+            }
+        }
+    }
+
     const pure_inputs = mapped_input.filter(input => input.value === undefined || input.value === null);
     
     // S'assurer que le nœud a un objet local_input_defs
