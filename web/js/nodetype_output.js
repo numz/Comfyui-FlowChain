@@ -124,7 +124,7 @@ function serialize(info) {
     this.setSize(info.size);
 }
 
-export function setupOutputNode(nodeType, nodeData, app) {
+export function setupOutputNode(nodeType) {
 
     nodeType.prototype.onNodeCreated =  function() {
         chainCallback(this, "onConfigure", configure);

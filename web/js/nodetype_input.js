@@ -23,8 +23,8 @@ function initialisation(node) {
                 ComfyWidgets.INT(
                     node,
                     "default",
-                    //['',{default: 0, "min": 0, "max": 18446744073709551616, "step": 1},],
-                    ['',{default: 0},],
+                    ['INT',{default: 0, "min": 0, "max": 18446744073709551616, "step": 1},],
+                    //['INT',{default: 0},],
                     app,
                 )
                 break;
@@ -33,7 +33,7 @@ function initialisation(node) {
                 ComfyWidgets.FLOAT(
                     node,
                     "default",
-                    ['',{default: 0, "min": 0.00, "max": 2048.00, "step": 0.01},],
+                    ['FLOAT',{default: 0, "min": 0.00, "max": 2048.00, "step": 0.01},],
                     app,
                 )
                 break;
@@ -60,7 +60,7 @@ function initialisation(node) {
 function configure(info) {
     const inputs = {};
     inputs["default"] = {inputs: ["default", info.widgets_values[1], info.widgets_values[2]]};
-    addInputs(this, inputs, info.widgets_values);
+    addInputs(this, inputs);
 }
 
 function serialize(info) {
@@ -76,7 +76,7 @@ function serialize(info) {
     }
 }
 
-export function setupInputNode(nodeType, nodeData, app) {
+export function setupInputNode(nodeType) {
     nodeType.prototype.onNodeCreated =  function() {
         chainCallback(this, "onConfigure", configure);
         chainCallback(this, "onSerialize", serialize);

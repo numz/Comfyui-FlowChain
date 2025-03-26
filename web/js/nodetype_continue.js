@@ -68,7 +68,13 @@ function serialize(info) {
     }
 
     for (let w of this.widgets) {
-        info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type, origType: w.origType, last_y: w.last_y};
+        info.widgets_values[w.name] = {
+            name: w.name, 
+            options : w.options, 
+            value: w.value, 
+            type: w.type, 
+            origType: w.origType, 
+            last_y: w.last_y};
     }
     for (let w of this.inputs){
         // if w.name exists in info.widgets_values
@@ -89,16 +95,23 @@ function serialize(info) {
     }
     if (this.outputs.length > 0){
         if (this.outputs[0].links == null){
-            info.outputs_values = {links: null, name: this.outputs[0].name, type: this.outputs[0].type};
+            info.outputs_values = {
+                links: null, 
+                name: this.outputs[0].name, 
+                type: this.outputs[0].type};
         }else{
-            info.outputs_values = {links: [...this.outputs[0].links], name: this.outputs[0].name, slot_index: this.outputs[0].slot_index, type: this.outputs[0].type};
+            info.outputs_values = {
+                links: [...this.outputs[0].links], 
+                name: this.outputs[0].name, 
+                slot_index: this.outputs[0].slot_index, 
+                type: this.outputs[0].type};
         }
     }
     this.setSize(info.size);
 }
 
 
-export function setupContinueNode(nodeType, nodeData, app) {
+export function setupContinueNode(nodeType) {
     nodeType.prototype.onNodeCreated =  function() {
         chainCallback(this, "onConfigure", configure);
         chainCallback(this, "onSerialize", serialize);

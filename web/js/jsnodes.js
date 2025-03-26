@@ -14,16 +14,16 @@ app.registerExtension({
 		}
 		switch (nodeData.name) {
 			case "Workflow":
-                setupWorkflowNode(nodeType, nodeData, app);
+                setupWorkflowNode(nodeType);
 			    break;
 			case "WorkflowInput":
-			    setupInputNode(nodeType, nodeData, app);
+			    setupInputNode(nodeType);
 			    break;
 			case "WorkflowContinue":
-                setupContinueNode(nodeType, nodeData, app);
+                setupContinueNode(nodeType);
 			    break;
 			case "WorkflowOutput":
-                setupOutputNode(nodeType, nodeData, app);
+                setupOutputNode(nodeType);
 			    break;
 			case "WorkflowLipSync":
                 setupLipSyncNode(nodeType, nodeData, app);

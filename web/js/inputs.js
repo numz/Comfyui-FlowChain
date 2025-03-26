@@ -99,7 +99,7 @@ export function addOutputs(root_obj, workflow_name){
 }
 
   
-export function addInputs(node, inputs, widgets_values, initial = false) {
+export function addInputs(node, inputs) {
     // Phase 1: Préparer les données triées et simplifiées
     const mapped_input = Object.entries(inputs)
         .sort(([, a], [, b]) => a.position - b.position)
