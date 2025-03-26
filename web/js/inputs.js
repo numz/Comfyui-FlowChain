@@ -120,12 +120,12 @@ export function addInputs(node, inputs, widgets_values) {
             const widget_input = widget_inputs[i];
             const widget_value = widgets_values[2 + i];
             //find name in mapped_input and replace value
-            for (let j = 0; j < mapped_input.length; j++){
-                if (mapped_input[j].name == widget_input.name){
-                    mapped_input[j].value = widget_value;
-                    break;
-                }
-            }
+            if (widget_value)
+                for (let j = 0; j < mapped_input.length; j++)
+                    if (mapped_input[j].name == widget_input.name){
+                        mapped_input[j].value = widget_value;
+                        break;
+                    }
         }
     }
 
@@ -284,19 +284,19 @@ export function addInputs(node, inputs, widgets_values) {
         // Déplacer tous les inputs avec widgets à la fin
         for (let i = 0; i < inputsWithWidgets.length; i++) {
             const currentIndex = inputsWithWidgets[i] - i; // Ajuster l'index car la liste change à chaque suppression
-            
+            const currentWidget = node.inputs[currentIndex];
             // Sauvegarder les informations de l'input et son lien
             let link = null;
-            if (node.inputs[currentIndex].link) {
+            if (currentWidget.link) {
                 let link = null;
-                if (node.inputs[actualIndex].link) {
-                    link = node.graph.links[node.inputs[actualIndex].link];
-                    node.graph.removeLink(node.inputs[actualIndex].link);
+                if (currentWidget.link) {
+                    link = node.graph.links[currentWidget.link];
+                    node.graph.removeLink(currentWidget.link);
                 }
             }
             
             // Sauvegarder les propriétés importantes
-            const inputToMove = node.inputs[currentIndex];
+            const inputToMove = currentWidget;
             const inputName = inputToMove.name;
             const inputType = inputToMove.type;
             const inputWidget = inputToMove.widget;
@@ -308,17 +308,15 @@ export function addInputs(node, inputs, widgets_values) {
             // Reconnecter le lien si nécessaire
             if (link && link.origin_id !== null) {
                 const newIndex = node.inputs.findIndex(input => input.name === inputName);
-                if (node.graph)
-                    node.graph.links[link.id].target_slot = newIndex;
-                    node.inputs[expected_position].link = link.id;
-                    
+                node.graph.links[link.id].target_slot = newIndex;
+                node.inputs[newIndex].link = link.id;
             }
-            if (link && link.origin_id !== null) {
+            /*if (link && link.origin_id !== null) {
                 const newIndex = node.inputs.findIndex(input => input.name === inputName);
                 link.target_slot = newIndex;
                 node.graph.links[link.id] = link;
                 node.inputs[newIndex].link = link.id;
-            }
+            }*/
 
         }
         
