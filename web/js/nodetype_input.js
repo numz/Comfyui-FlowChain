@@ -1,4 +1,5 @@
 import { chainCallback } from "./utils.js";
+import { ComfyWidgets } from '../../../scripts/widgets.js'
 import { addInputs, cleanInputs, clearInputs } from "./inputs.js";
 import { colors, bg_colors, node_type_list } from "./constants.js";
 
@@ -57,21 +58,13 @@ function initialisation(node) {
 }
 
 function configure(info) {
-    let widgetDict = info.widgets_values;
     const inputs = {};
-
-    inputs["default"] = {
-        inputs: ["default", info.widgets_values[1], info.widgets_values[2]]
-    };
-
+    inputs["default"] = {inputs: ["default", info.widgets_values[1], info.widgets_values[2]]};
     addInputs(this, inputs, info.widgets_values);
 }
 
 function serialize(info) {
-    let widgetDict = info.widgets_values;
-
     for (let inp of this.inputs){
-        // if w.name exists in info.widgets_values
         if (inp.widget){
             if (inp.type != this.local_input_defs.required[inp.name][0]){
                 inp.type = this.local_input_defs.required[inp.name][0];
