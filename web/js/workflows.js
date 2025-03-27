@@ -23,15 +23,13 @@ async function convertWorkflowToApiFormat(standardWorkflow) {
             try {
                 // Créer un graph temporaire isolé
                 const tempGraph = new LGraph();
-                
-                // Configurer sans déclencher de callbacks
-                tempGraph.configure(standardWorkflow);
-                
                 // Sauvegarder la référence du graphe original
                 const originalGraph = app.graph;
                 
                 // Utiliser graphToPrompt en mode isolé
-                app.graph = tempGraph;
+                app.graph = tempGraph;               
+                // Configurer sans déclencher de callbacks
+                tempGraph.configure(standardWorkflow);
                 
                 app.graphToPrompt(tempGraph)
                     .then(apiData => {
