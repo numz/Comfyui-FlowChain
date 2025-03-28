@@ -26,4 +26,4 @@ Before submitting a pull request, please make sure your code adheres to the proj
 
 If you have any questions or need help, please ping the developer via discord NumZ#7184 to make sure your addition will fit well into such a large project and to get help if needed.
 
-Thank you again for your contribution!
+Thank you again for your contribution !
