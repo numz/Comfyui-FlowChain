@@ -10,6 +10,6 @@ Repository = "https://github.com/numz/Comfyui-FlowChain"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "numz"
 DisplayName = "Comfyui-FlowChain"
 Icon = ""
