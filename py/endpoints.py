@@ -10,24 +10,24 @@ def get_workflow_data(workflow_file):
     nodes_input = {}
     nodes_output = {}
 
-    if "nodes" in workflow_file:
-        # Extraire les nœuds WorkflowInput et WorkflowOutput
-        for node in workflow_file["nodes"]:
-            if node.get("type") == "WorkflowInput":
-                # Convertir au format compatible pour le client
-                node_id = str(node.get("id", "unknown"))
-                nodes_input[node_id] = {
-                    "class_type": "WorkflowInput",
-                    "inputs": node.get("widgets_values", {}),
-                    "position": node.get("pos", {})[1]
-                }
-            elif node.get("type") == "WorkflowOutput":
-                node_id = str(node.get("id", "unknown"))
-                nodes_output[node_id] = {
-                    "class_type": "WorkflowOutput",
-                    "inputs": node.get("widgets_values", {}),
-                    "position": node.get("pos", {})[1]
-                }
+
+    # Extraire les nœuds WorkflowInput et WorkflowOutput
+    for node in workflow_file["nodes"]:
+        if node.get("type") == "WorkflowInput":
+            # Convertir au format compatible pour le client
+            node_id = str(node.get("id", "unknown"))
+            nodes_input[node_id] = {
+                "class_type": "WorkflowInput",
+                "inputs": node.get("widgets_values", {}),
+                "position": node.get("pos", {})[1]
+            }
+        elif node.get("type") == "WorkflowOutput":
+            node_id = str(node.get("id", "unknown"))
+            nodes_output[node_id] = {
+                "class_type": "WorkflowOutput",
+                "inputs": node.get("widgets_values", {}),
+                "position": node.get("pos", {})[1]
+            }
         # sort by position
         nodes_input = dict(sorted(nodes_input.items(), key=lambda item: item[1]["position"]))
         nodes_output = dict(sorted(nodes_output.items(), key=lambda item: item[1]["position"]))
@@ -58,7 +58,10 @@ async def workflows(request):
                         with open(file_path, "r", encoding="utf-8") as f:
                             json_content = json.load(f)
                         relative_path = os.path.relpath(file_path, str(json_path))
-                        result[relative_path] = get_workflow_data(json_content)
+                        if "nodes" in json_content:
+                            file_conf = get_workflow_data(json_content)
+                            if file_conf["inputs"] or file_conf["outputs"]:
+                                result[relative_path] = file_conf
 
                     except json.JSONDecodeError:
                         # Ignorer les fichiers JSON mal formés
@@ -91,8 +94,10 @@ async def workflow(request):
     if os.path.exists(json_path):
         with open(json_path, "r", encoding="utf-8") as f:
             json_content = json.load(f)
-
-        result = get_workflow_data(json_content)
+        if "nodes" in json_content:
+            result = get_workflow_data(json_content)
+        else:
+            result = {"error": "File not found"}
     else:
         result = {"error": "File not found"}
 
