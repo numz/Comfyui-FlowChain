@@ -333,7 +333,7 @@ class Workflow(SaveImage):
             workflow = recursive_delete(workflow, switch_to_delete + continue_to_delete)
             return workflow, workflow_outputs
 
-        def get_recursive_workflow(workflows, max_id=0):
+        def get_recursive_workflow(workflow_name, workflows, max_id=0):
             # if workflows[-5:] == ".json":
             #    workflow = get_workflow(workflows)
             # else:
@@ -342,14 +342,14 @@ class Workflow(SaveImage):
                     raise ValueError("Empty workflow.")
                 workflow = json.loads(workflows)
             except:
-                raise RuntimeError(f"Error while loading workflow: {workflows}, probably due to an incompatible node in subworkflow. See <a href='https://github.com/numz/Comfyui-FlowChain'> for more information.")
+                raise RuntimeError(f"Error while loading workflow: {workflow_name}, probably due to an incompatible node in subworkflow. See <a href='https://github.com/numz/Comfyui-FlowChain'> for more information.")
 
             workflow, max_id = redefine_id(workflow, max_id)
             sub_workflows = {k: v for k, v in workflow.items() if v["class_type"] == "Workflow"}
             for key, sub_workflow_node in sub_workflows.items():
                 workflow_json = sub_workflow_node["inputs"]["workflow"]
                 workflow_name = sub_workflow_node["inputs"]["workflows"]
-                subworkflow, max_id = get_recursive_workflow(workflow_json, max_id)
+                subworkflow, max_id = get_recursive_workflow(workflow_name, workflow_json, max_id)
 
                 workflow_outputs_sub = {k: v for k, v in subworkflow.items() if v["class_type"] == "WorkflowOutput"}
                 workflow, subworkflow = merge_inputs_outputs(workflow, workflow_name, subworkflow, workflow_outputs_sub)
@@ -376,7 +376,7 @@ class Workflow(SaveImage):
             # Fallback to empty inputs if server instance not available
             original_inputs = {}
         
-        workflow, _ = get_recursive_workflow(workflow, 5000)
+        workflow, _ = get_recursive_workflow(workflows, workflow, 5000)
         workflow, workflow_outputs = clean_workflow(workflow, original_inputs, kwargs)
         
         # Accéder au fichier JSON original pour obtenir les positions correctes
