@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-flowchain"
+description = "Convert your workflows into node and chain them."
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["gradio_client==0.8.0"]
+
+[project.urls]
+Repository = "https://github.com/numz/Comfyui-FlowChain"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "numz"
+DisplayName = "Comfyui-FlowChain"
+Icon = ""
