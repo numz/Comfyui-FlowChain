@@ -67,7 +67,7 @@ async function convertWorkflowToApiFormat(standardWorkflow) {
                         // Restaurer le callback du graphe
                         LGraph.prototype.onConfigure = originalOnConfigure;
                         
-                        console.log("Conversion terminée et sandbox nettoyée");
+                        //console.log("Conversion terminée et sandbox nettoyée");
                     });
             } catch (error) {
                 // En cas d'erreur, restaurer les callbacks et rejeter

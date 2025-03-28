@@ -342,7 +342,7 @@ class Workflow(SaveImage):
                     raise ValueError("Empty workflow.")
                 workflow = json.loads(workflows)
             except:
-                raise RuntimeError(f"Error while loading workflow: {workflow_name}, probably due to an incompatible node in subworkflow. See <a href='https://github.com/numz/Comfyui-FlowChain'> for more information.")
+                raise RuntimeError(f"Error while loading workflow: {workflow_name}, See <a href='https://github.com/numz/Comfyui-FlowChain'> for more information.")
 
             workflow, max_id = redefine_id(workflow, max_id)
             sub_workflows = {k: v for k, v in workflow.items() if v["class_type"] == "Workflow"}

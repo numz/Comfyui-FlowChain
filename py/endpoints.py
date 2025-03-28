@@ -32,11 +32,9 @@ def get_workflow_data(workflow_file):
         nodes_input = dict(sorted(nodes_input.items(), key=lambda item: item[1]["position"]))
         nodes_output = dict(sorted(nodes_output.items(), key=lambda item: item[1]["position"]))
 
-    if nodes_input or nodes_output:
-        # Créer une clé unique basée sur le chemin relatif
-        return {"inputs": nodes_input,
-                "outputs": nodes_output,
-                'workflow': workflow_file}
+    return {"inputs": nodes_input,
+            "outputs": nodes_output,
+            'workflow': workflow_file}
 
 
 @server.PromptServer.instance.routes.get("/flowchain/workflows")
@@ -54,7 +52,6 @@ async def workflows(request):
                 if file.lower().endswith('.json'):
                     file_path = os.path.join(root, file)
                     try:
-
                         with open(file_path, "r", encoding="utf-8") as f:
                             json_content = json.load(f)
                         relative_path = os.path.relpath(file_path, str(json_path))
