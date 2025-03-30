@@ -119,7 +119,7 @@ class Workflow(SaveImage):
     def generate(self, workflows, workflow, **kwargs):
 
         def populate_inputs(workflow, inputs, kwargs_values):
-            workflow_inputs = {k: v for k, v in workflow.items() if v["class_type"] == "WorkflowInput"}
+            workflow_inputs = {k: v for k, v in workflow.items() if  "class_type" in v and v["class_type"] == "WorkflowInput"}
             for key, value in workflow_inputs.items():
                 if value["inputs"]["Name"] in inputs:
                     if type(inputs[value["inputs"]["Name"]]) == list:
@@ -128,7 +128,7 @@ class Workflow(SaveImage):
                     else:
                         workflow[key]["inputs"]["default"] = inputs[value["inputs"]["Name"]]
 
-            workflow_inputs_images = {k: v for k, v in workflow.items() if
+            workflow_inputs_images = {k: v for k, v in workflow.items() if "class_type" in v and
                                       v["class_type"] == "WorkflowInput" and v["inputs"]["type"] == "IMAGE"}
             for key, value in workflow_inputs_images.items():
                 if "default" not in value["inputs"]:
@@ -143,7 +143,7 @@ class Workflow(SaveImage):
             #do_net_delete = []
             switch_to_delete = [-1]
             while len(switch_to_delete) > 0:
-                switch_nodes = {k: v for k, v in workflow.items() if
+                switch_nodes = {k: v for k, v in workflow.items() if "class_type" in v and
                                 v["class_type"].startswith("Switch") and v["class_type"].endswith("[Crystools]")}
                 # order switch nodes by inputs.boolean value
                 switch_to_delete = []
@@ -205,14 +205,14 @@ class Workflow(SaveImage):
                             switch_to_delete.append(switch_id)
                 print(switch_to_delete)
                 workflow = {k: v for k, v in workflow.items() if
-                            not (v["class_type"].startswith("Switch") and v["class_type"].endswith(
+                            not ("class_type" in v and v["class_type"].startswith("Switch") and v["class_type"].endswith(
                                 "[Crystools]") and k in switch_to_delete)}
 
             return workflow, to_delete
 
         def treat_continue(workflow):
             to_delete = []
-            continue_nodes = {k: v for k, v in workflow.items() if
+            continue_nodes = {k: v for k, v in workflow.items() if "class_type" in v and
                               v["class_type"].startswith("WorkflowContinue")}
             do_net_delete = []
             for continue_node_id, continue_node in continue_nodes.items():
@@ -245,7 +245,7 @@ class Workflow(SaveImage):
                                             to_delete.append(node_id)
 
             workflow = {k: v for k, v in workflow.items() if
-                                    not (v["class_type"].startswith("WorkflowContinue") and k not in do_net_delete)}
+                                    not ("class_type" in v and v["class_type"].startswith("WorkflowContinue") and k not in do_net_delete)}
             return workflow, to_delete
 
         def redefine_id(subworkflow, max_id):
@@ -284,8 +284,8 @@ class Workflow(SaveImage):
             # coinvert workflow_outputs to list
             workflow_outputs = list(workflow_outputs.values())
             # prendre le premier workflow
-            workflow_node = [{"id":k, **v} for k, v in workflow.items() if v["class_type"] == "Workflow" and v["inputs"]["workflows"] == workflow_name][0]
-            sub_input_nodes = {k: v for k, v in subworkflow.items() if v["class_type"] == "WorkflowInput"}
+            workflow_node = [{"id":k, **v} for k, v in workflow.items() if "class_type" in v and v["class_type"] == "Workflow" and v["inputs"]["workflows"] == workflow_name][0]
+            sub_input_nodes = {k: v for k, v in subworkflow.items() if "class_type" in v and v["class_type"] == "WorkflowInput"}
             do_not_delete = []
             for sub_id, sub_node in sub_input_nodes.items():
                 if sub_node["inputs"]["Name"] in workflow_node["inputs"]:
@@ -297,9 +297,9 @@ class Workflow(SaveImage):
                         do_not_delete.append(sub_id)
 
             # remove input node
-            subworkflow = {k: v for k, v in subworkflow.items() if not (v["class_type"] == "WorkflowInput" and k not in do_not_delete)}
+            subworkflow = {k: v for k, v in subworkflow.items() if not ("class_type" in v and v["class_type"] == "WorkflowInput" and k not in do_not_delete)}
 
-            sub_output_nodes = {k: v for k, v in subworkflow.items() if v["class_type"] == "WorkflowOutput"}
+            sub_output_nodes = {k: v for k, v in subworkflow.items() if "class_type" in v and v["class_type"] == "WorkflowOutput"}
             workflow_copy = copy.deepcopy(workflow)
             for node_id, node in workflow_copy.items():
                 for input_name, input_value in node["inputs"].items():
@@ -311,7 +311,7 @@ class Workflow(SaveImage):
                                         workflow[node_id]["inputs"][input_name] = sub_output_node["inputs"]["default"]
 
             # remove output node
-            subworkflow = {k: v for k, v in subworkflow.items() if not (v["class_type"] == "WorkflowOutput")}
+            subworkflow = {k: v for k, v in subworkflow.items() if not ("class_type" in v and v["class_type"] == "WorkflowOutput")}
 
             return workflow, subworkflow
 
@@ -323,7 +323,7 @@ class Workflow(SaveImage):
             if inputs is not None:
                 workflow = populate_inputs(workflow, inputs, kwargs_values)
 
-            workflow_outputs = {k: v for k, v in workflow.items() if v["class_type"] == "WorkflowOutput"}
+            workflow_outputs = {k: v for k, v in workflow.items() if "class_type" in v and v["class_type"] == "WorkflowOutput"}
 
             for output_id, output_node in workflow_outputs.items():
                 workflow[output_id]["inputs"]["ui"] = False
@@ -345,13 +345,13 @@ class Workflow(SaveImage):
                 raise RuntimeError(f"Error while loading workflow: {workflow_name}, See <a href='https://github.com/numz/Comfyui-FlowChain'> for more information.")
 
             workflow, max_id = redefine_id(workflow, max_id)
-            sub_workflows = {k: v for k, v in workflow.items() if v["class_type"] == "Workflow"}
+            sub_workflows = {k: v for k, v in workflow.items() if "class_type" in v and v["class_type"] == "Workflow"}
             for key, sub_workflow_node in sub_workflows.items():
                 workflow_json = sub_workflow_node["inputs"]["workflow"]
                 workflow_name = sub_workflow_node["inputs"]["workflows"]
                 subworkflow, max_id = get_recursive_workflow(workflow_name, workflow_json, max_id)
 
-                workflow_outputs_sub = {k: v for k, v in subworkflow.items() if v["class_type"] == "WorkflowOutput"}
+                workflow_outputs_sub = {k: v for k, v in subworkflow.items() if "class_type" in v and v["class_type"] == "WorkflowOutput"}
                 workflow, subworkflow = merge_inputs_outputs(workflow, workflow_name, subworkflow, workflow_outputs_sub)
                 workflow = {k: v for k, v in workflow.items() if k != key}
                 # add subworkflow to workflow
