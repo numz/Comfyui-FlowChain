@@ -14,27 +14,6 @@ import gc
 import folder_paths
 from server import PromptServer
 from execution import PromptExecutor
-from comfy.model_patcher import ModelPatcher # Added import
-from comfy.sd import CLIP, VAE # Added imports
-
-
-# Add this custom JSON Encoder class
-class ComfyUIObjectEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, torch.Tensor):
-            return f"<Tensor shape={obj.shape} dtype={obj.dtype} device={obj.device}>"
-        elif isinstance(obj, ModelPatcher):
-            # Represent ModelPatcher as a descriptive string
-            # You could add more details if needed, e.g., obj.model.__class__.__name__
-            return f"<ModelPatcher instance: {type(obj.model).__name__ if hasattr(obj, 'model') else 'Generic'}>"
-        elif isinstance(obj, CLIP):
-            # Represent CLIP as a descriptive string
-            return f"<CLIP instance: {type(obj.cond_stage_model).__name__ if hasattr(obj, 'cond_stage_model') else 'Generic'}>"
-        elif isinstance(obj, VAE):
-            # Represent VAE as a descriptive string
-            return f"<VAE instance: {type(obj.first_stage_model).__name__ if hasattr(obj, 'first_stage_model') else 'Generic'}>"
-        # Let the base class default method raise the TypeError for other types
-        return json.JSONEncoder.default(self, obj)
 
 
 class ExecutionResult(Enum):
@@ -449,13 +428,6 @@ class Workflow(SaveImage):
             
         simple_server = SimpleServer()
         executor = PromptExecutor(simple_server)
-        # Before executing, you can print the workflow structure for debugging
-        print(json.dumps(workflow, indent=2, cls=ComfyUIObjectEncoder)) # MODIFIED: Use the new encoder
-        # Or specifically find the ShowText node if you know its ID or can iterate
-        for node_id, node_data in workflow.items():
-            if node_data.get("class_type") == "ShowText": # Or whatever the exact class_type is
-                print(f"ShowText Node {node_id} inputs: {node_data.get('inputs')}")
-
         executor.execute(workflow, prompt_id, {"client_id": client_id}, workflow_outputs_id)
 
         history_result = executor.history_result
