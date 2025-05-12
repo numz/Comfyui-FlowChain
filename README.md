@@ -45,6 +45,7 @@ By solving these problems, my tool makes node management more intuitive, stable,
 **2025.05.12**
 
 - 🛠️ Fixed instabilities for comfyui version > 0.3.27 (thanks to [o0oradaro0o](https://github.com/o0oradaro0o))
+- 🛠️ Fixed order output (thanks to [springjk](https://github.com/springjk))
 
 **2025.03.26**
 
