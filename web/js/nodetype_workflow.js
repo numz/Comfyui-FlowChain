@@ -222,6 +222,21 @@ function configure(info) {
       addOutputs(this, selectedWorkflowName);
       removeInputs(this, inputs, info.widgets_values || []);
       fitHeight(this);
+      importWorkflow(this, selectedWorkflowName, app)
+        .then((data) => {
+          if (data) {
+            this.widgets[1].value = data;
+            const inputs = app.lipsync_studio[selectedWorkflowName].inputs;
+
+            addInputs(this, inputs, info.widgets_values);
+            addOutputs(this, selectedWorkflowName);
+            removeInputs(this, inputs, info.widgets_values);
+            fitHeight(this);
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur lors de l'importation:", error);
+        });
     } else {
       // Data not yet in lipsync_studio, try to import.
       // The callback of widget[0] will handle this if triggered by value change,

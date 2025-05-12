@@ -299,7 +299,41 @@ class Workflow(SaveImage):
             # remove input node
             subworkflow = {k: v for k, v in subworkflow.items() if not ("class_type" in v and v["class_type"] == "WorkflowInput" and k not in do_not_delete)}
 
+            # get sub workflow file path
+            sub_workflow_file_path = os.path.join(folder_paths.user_directory, "default", "workflows", workflow_name)
+            sub_original_positions = {}
+            
+            if os.path.exists(sub_workflow_file_path):
+                try:
+                    with open(sub_workflow_file_path, "r", encoding="utf-8") as f:
+                        sub_original_workflow = json.load(f)
+                        
+                    if "nodes" in sub_original_workflow:
+                        for node in sub_original_workflow["nodes"]:
+                            if node.get("type") == "WorkflowOutput":
+                                node_id = str(node.get("id", "unknown"))
+                                pos_y = node.get("pos", [0, 0])[1]
+                                node_name = node.get("widgets_values", "")["Name"]["value"]
+                                sub_original_positions[node_name] = pos_y
+                except Exception as e:
+                    print(f"Error reading sub-workflow file: {str(e)}")
+
             sub_output_nodes = {k: v for k, v in subworkflow.items() if "class_type" in v and v["class_type"] == "WorkflowOutput"}
+            
+            # sort sub workflow output nodes
+            sub_outputs_with_position = []
+            for k, v in sub_output_nodes.items():
+                output_name = v["inputs"]["Name"]
+                y_position = sub_original_positions.get(output_name, 999999)
+                sub_outputs_with_position.append((k, y_position))
+
+            sub_outputs_with_position.sort(key=lambda x: x[1])
+            sub_output_nodes = {k: sub_output_nodes[k] for k, _ in sub_outputs_with_position}
+
+            print(f"Sub-workflow {workflow_name} outputs order in merge:")
+            for k, v in sub_output_nodes.items():
+                print(f"  {v['inputs']['Name']}: {sub_original_positions.get(v['inputs']['Name'], 999999)}")
+                
             workflow_copy = copy.deepcopy(workflow)
             for node_id, node in workflow_copy.items():
                 for input_name, input_value in node["inputs"].items():
@@ -348,11 +382,45 @@ class Workflow(SaveImage):
             sub_workflows = {k: v for k, v in workflow.items() if "class_type" in v and v["class_type"] == "Workflow"}
             for key, sub_workflow_node in sub_workflows.items():
                 workflow_json = sub_workflow_node["inputs"]["workflow"]
-                workflow_name = sub_workflow_node["inputs"]["workflows"]
-                subworkflow, max_id = get_recursive_workflow(workflow_name, workflow_json, max_id)
+                sub_workflow_name = sub_workflow_node["inputs"]["workflows"]
+                subworkflow, max_id = get_recursive_workflow(sub_workflow_name, workflow_json, max_id)
+
+                # get sub workflow file path
+                sub_workflow_file_path = os.path.join(folder_paths.user_directory, "default", "workflows", sub_workflow_name)
+                sub_original_positions = {}
+                
+                if os.path.exists(sub_workflow_file_path):
+                    try:
+                        with open(sub_workflow_file_path, "r", encoding="utf-8") as f:
+                            sub_original_workflow = json.load(f)
+                            
+                        if "nodes" in sub_original_workflow:
+                            for node in sub_original_workflow["nodes"]:
+                                if node.get("type") == "WorkflowOutput":
+                                    node_id = str(node.get("id", "unknown"))
+                                    pos_y = node.get("pos", [0, 0])[1]
+                                    node_name = node.get("widgets_values", "")["Name"]["value"]
+                                    sub_original_positions[node_name] = pos_y
+                    except Exception as e:
+                        print(f"Error reading sub-workflow file: {str(e)}")
 
                 workflow_outputs_sub = {k: v for k, v in subworkflow.items() if "class_type" in v and v["class_type"] == "WorkflowOutput"}
-                workflow, subworkflow = merge_inputs_outputs(workflow, workflow_name, subworkflow, workflow_outputs_sub)
+                
+                # sort sub workflow output nodes
+                sub_outputs_with_position = []
+                for k, v in workflow_outputs_sub.items():
+                    output_name = v["inputs"]["Name"]
+                    y_position = sub_original_positions.get(output_name, 999999)
+                    sub_outputs_with_position.append((k, y_position))
+
+                sub_outputs_with_position.sort(key=lambda x: x[1])
+                workflow_outputs_sub = {k: workflow_outputs_sub[k] for k, _ in sub_outputs_with_position}
+
+                print(f"Sub-workflow {sub_workflow_name} outputs order:")
+                for k, v in workflow_outputs_sub.items():
+                    print(f"  {v['inputs']['Name']}: {sub_original_positions.get(v['inputs']['Name'], 999999)}")
+
+                workflow, subworkflow = merge_inputs_outputs(workflow, sub_workflow_name, subworkflow, workflow_outputs_sub)
                 workflow = {k: v for k, v in workflow.items() if k != key}
                 # add subworkflow to workflow
                 workflow.update(subworkflow)
