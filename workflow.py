@@ -329,10 +329,6 @@ class Workflow(SaveImage):
 
             sub_outputs_with_position.sort(key=lambda x: x[1])
             sub_output_nodes = {k: sub_output_nodes[k] for k, _ in sub_outputs_with_position}
-
-            print(f"Sub-workflow {workflow_name} outputs order in merge:")
-            for k, v in sub_output_nodes.items():
-                print(f"  {v['inputs']['Name']}: {sub_original_positions.get(v['inputs']['Name'], 999999)}")
                 
             workflow_copy = copy.deepcopy(workflow)
             for node_id, node in workflow_copy.items():
@@ -415,10 +411,6 @@ class Workflow(SaveImage):
 
                 sub_outputs_with_position.sort(key=lambda x: x[1])
                 workflow_outputs_sub = {k: workflow_outputs_sub[k] for k, _ in sub_outputs_with_position}
-
-                print(f"Sub-workflow {sub_workflow_name} outputs order:")
-                for k, v in workflow_outputs_sub.items():
-                    print(f"  {v['inputs']['Name']}: {sub_original_positions.get(v['inputs']['Name'], 999999)}")
 
                 workflow, subworkflow = merge_inputs_outputs(workflow, sub_workflow_name, subworkflow, workflow_outputs_sub)
                 workflow = {k: v for k, v in workflow.items() if k != key}
