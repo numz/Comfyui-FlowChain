@@ -42,6 +42,10 @@ By solving these problems, my tool makes node management more intuitive, stable,
 
 ## 🚀 Updates
 
+**2025.05.14**
+
+- 🛠️ Minimum Comfyui version is now **0.3.33**
+
 **2025.05.12**
 
 - 🛠️ Fixed instabilities for comfyui version > 0.3.27 (thanks to [o0oradaro0o](https://github.com/o0oradaro0o))
@@ -52,7 +56,7 @@ By solving these problems, my tool makes node management more intuitive, stable,
 - 💪 Live update of workflow when modifying a subworkflow, just 1 second after saving the subworkflow. But you need to back and forth to see the changes. if you work on one screen no problem, but if you work on two screens you need to back and forth to see the changes.
 - ↕️ Capability to order inputs and outputs in the workflow node. Order depends on the order of the input/output from top to bottom in the subworkflow.
 - 🛠️ Fixed some instabilities.
-- 🆙 Must work with ComfyUI 1.11.8 and above.
+- 🆙 Must work with ComfyUI 1.18.9 and above.
 
 **2025.03.23**
 First of all, I apologize for not maintaining the code regularly. ComfyUI has evolved significantly since my last version, so I've completely revised the code to ensure better integration with ComfyUI and avoid future issues.
@@ -123,6 +127,8 @@ After this command be created folder Comfyui-FlowChain
 | <img src="docs/assets/lipsync.png" width="100%">  | _Workflow Lipsync_  |                           Extra Node to use LipSync Studio via API                            |   FlowChain ⛓️   |
 
 # 🐍 Usage
+
+[Quick Video Tutorial](https://www.youtube.com/watch?v=7C8-vX0sTAc)
 
 ## ⛓️ Workflow Node
 
