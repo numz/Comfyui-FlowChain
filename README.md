@@ -196,6 +196,21 @@ export const node_type_list = [
 ];
 ```
 
+if you have more than 20 types you must add new colors and background colors :
+
+```
+export const colors = [
+  "#222222",
+  "#5940bb",
+  ...
+]
+export const bg_colors = [
+  "#000000",
+  "#392978",
+  ...
+]
+```
+
 ## ⛓️ Continue Node
 
 ![Illustration](docs/assets/continue1.png)
@@ -276,3 +291,7 @@ Your support helps me cover the costs of development and maintenance, and allows
 # 📜 License
 
 - The code in this repository is released under the MIT license as found in the [LICENSE file](LICENSE).
+
+```
+
+```
