@@ -164,6 +164,38 @@ For a workflow to be considered **compatible**, it must contain at least one "Wo
 
 ![Illustration](docs/assets/output2.png)
 
+# Add a Custom TYPE
+
+Because I can’t list every possible ComfyUI type, you can add your own TYPES. I can’t guarantee it’ll work for every possible type, but give it a shot, it should work for the vast majority.
+
+Just add you TYPE in :
+
+```
+workflow_nodes.py:
+node_type_list = ["none", "IMAGE", "MASK", "STRING", "INT", "FLOAT", "LATENT", "BOOLEAN", "CLIP", "CONDITIONING",
+"MODEL", "VAE"]
+```
+
+```
+web/js/constants.js :
+export const node_type_list = [
+"none",
+"IMAGE",
+"MASK",
+"STRING",
+"INT",
+"FLOAT",
+"LATENT",
+"CLIP",
+"CONDITIONING",
+"MODEL",
+"VAE",
+"BOOLEAN",
+"SWITCH",
+"AUDIO"
+];
+```
+
 ## ⛓️ Continue Node
 
 ![Illustration](docs/assets/continue1.png)
