@@ -154,7 +154,8 @@ For a workflow to be considered **compatible**, it must contain at least one "Wo
 ![Illustration](docs/assets/input2.png)
 
 - Allow to declare inputs in your workflow.
-- Give a Name
+- drag the **output** socket on another input socket node, type detects automatically
+- Give a Name.
 - **Default** value is used when debugging your workflow or if you don't plug an input into the **Workflow** node.
 
 - ![Illustration](docs/assets/workflow5.png)
@@ -164,7 +165,8 @@ For a workflow to be considered **compatible**, it must contain at least one "Wo
 ![Illustration](docs/assets/output1.png)
 
 - Allow to declare outputs in your workflow.
-- Give a Name and select the type.
+- drag the **default** input socket on another output socket node, type detects automatically
+- Give a Name.
 - **Default** value is used to connect the output.
 
 ![Illustration](docs/assets/output2.png)
