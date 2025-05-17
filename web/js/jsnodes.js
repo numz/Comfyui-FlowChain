@@ -96,7 +96,8 @@ function addCustomMenu() {
     requestAnimationFrame(addCustomMenu);
     return;
   }
-  const Workflow_menu = document.getElementById("pv_id_10_0_list"); // Attention à la stabilité de cet ID
+  const Workflow_menu = document.getElementsByClassName("p-menubar-submenu")[0];
+
   if (!Workflow_menu) {
     console.warn(
       "Le menu cible 'pv_id_10_0_list' n'a pas été trouvé. L'élément 'Export FlowChain (Zip)' ne sera pas ajouté."
