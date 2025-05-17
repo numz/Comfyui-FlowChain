@@ -134,8 +134,14 @@ class Workflow(SaveImage):
                 if "default" not in value["inputs"]:
                     workflow[key]["inputs"]["default"] = torch.tensor([])
                 else:
-                    if value["inputs"]["default"].numel() == 0:
+                    if isinstance(value["inputs"]["default"], list):
+                        # Si c'est une liste, on la laisse telle quelle
                         workflow[key]["inputs"]["default"] = torch.tensor([])
+                    else:
+                        # Si c'est un tensor, on vérifie s'il est vide
+                        if value["inputs"]["default"].numel() == 0:
+                            workflow[key]["inputs"]["default"] = torch.tensor([])
+                    
             return workflow
 
         def treat_switch(workflow):

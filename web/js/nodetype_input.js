@@ -47,7 +47,7 @@ function initialisation_preGraph(node) {
           const node_input = other_node.inputs[link_info.target_slot];
           let widget_input = null;
           let options = {};
-          if (node_input.widget) {
+          if (node_input && node_input.widget) {
             if ("name" in node_input.widget) {
               widget_input = other_node.widgets.find(
                 (w) => w.name == node_input.widget.name
@@ -75,7 +75,7 @@ function initialisation_preGraph(node) {
             if (node.widgets_values && node.widgets_values.length == 2) {
               node.widgets[0].value = node.widgets_values[0];
             } else {
-              node.widgets[0].value = node_input.name;
+              node.widgets[0].value = node_input ? node_input.name : "";
             }
           }
           switch (type) {
@@ -89,7 +89,7 @@ function initialisation_preGraph(node) {
               }
               node.widgets[1].options = options;
 
-              node.inputs[0].type = node_input.type;
+              node.inputs[0].type = node_input ? node_input.type : "*";
               if (
                 !("widget" in node.inputs[0]) ||
                 node.inputs[0].widget == undefined
@@ -111,7 +111,7 @@ function initialisation_preGraph(node) {
                 node.widgets[1].value = widget_input.value;
               }
               node.widgets[1].options = options;
-              node.inputs[0].type = node_input.type;
+              node.inputs[0].type = node_input ? node_input.type : "*";
               if (
                 !("widget" in node.inputs[0]) ||
                 node.inputs[0].widget == undefined
@@ -132,7 +132,7 @@ function initialisation_preGraph(node) {
                 node.widgets[1].value = widget_input.value;
               }
               node.widgets[1].options = options;
-              node.inputs[0].type = node_input.type;
+              node.inputs[0].type = node_input ? node_input.type : "*";
               if (
                 !("widget" in node.inputs[0]) ||
                 node.inputs[0].widget == undefined
@@ -157,7 +157,7 @@ function initialisation_preGraph(node) {
               } else {
                 node.widgets[1].options = node.widgets_values[1][1];
               }
-              node.inputs[0].type = node_input.type;
+              node.inputs[0].type = node_input ? node_input.type : "*";
               if (
                 !("widget" in node.inputs[0]) ||
                 node.inputs[0].widget == undefined
@@ -197,7 +197,7 @@ function initialisation_preGraph(node) {
                   node.widgets[1].value = widget_input.value;
                 }
                 node.widgets[1].options = options;
-                node.inputs[0].type = node_input.type;
+                node.inputs[0].type = node_input ? node_input.type : "*";
                 if (
                   !("widget" in node.inputs[0]) ||
                   node.inputs[0].widget == undefined
@@ -216,7 +216,7 @@ function initialisation_preGraph(node) {
                 //node.widgets = node.widgets.splice(0, 1);
                 //node.widgets_values = node.widgets_values.splice(0, 1);
 
-                node.inputs[0].type = node_input.type;
+                node.inputs[0].type = node_input ? node_input.type : "*";
                 if (
                   !("widget" in node.inputs[0]) ||
                   node.inputs[0].widget == undefined

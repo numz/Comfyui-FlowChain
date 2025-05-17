@@ -72,7 +72,7 @@ async def workflows(request):
                     try:
                         with open(file_path, "r", encoding="utf-8") as f:
                             json_content = json.load(f)
-                        print(file_path);
+                        # print(file_path);
                         relative_path = os.path.relpath(file_path, str(json_path))
                         if "nodes" in json_content:
                             file_conf = get_workflow_data(json_content)
