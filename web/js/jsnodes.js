@@ -57,13 +57,11 @@ async function recursiveZip(nodes, zipInstance) {
 
       // S'assurer que le nom de fichier est valide et se termine par .json
       // Remplace les caractères non valides pour un nom de fichier par _
-      const safePath = path.replace(/[^a-zA-Z0-9/._-]/g, "_");
-      const fileNameInZip = safePath.endsWith(".json")
-        ? safePath
-        : `${safePath}.json`;
+      //const safePath = path.replace(/[^a-zA-Z0-9/._-]/g, "_");
+      //const fileNameInZip = path.endsWith(".json") ? path : `${safePath}.json`;
 
-      zipInstance.file(fileNameInZip, JSON.stringify(jsonFile, null, 2));
-      console.log(`Added ${fileNameInZip} to zip.`);
+      zipInstance.file(path, JSON.stringify(jsonFile, null, 2));
+      console.log(`Added ${path} to zip.`);
 
       if (jsonFile && jsonFile.workflow && jsonFile.workflow.nodes) {
         const subWorkflowNodes = jsonFile.workflow.nodes.filter(

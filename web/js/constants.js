@@ -66,5 +66,12 @@ export const node_type_list = [
   "PROMPT",
 ];
 export const string_widget = [
-  "STRING"
+  "STRING",
+  "text",
+  "IMAGE_PATH",
+  "AUDIO_PATH",
+  "VIDEO_PATH",
+  "AUDIO/VIDEO_PATH",
+  "DOC_PATH",
+  "PROMPT",
 ];
