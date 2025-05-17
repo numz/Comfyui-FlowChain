@@ -1,6 +1,35 @@
 import { addWidgets, convertToInput, getDefaultOptions } from "./widgets.js";
 import { string_widget } from "./constants.js";
 
+export function createColor(type, bg = false) {
+  // Generate a consistent color based on the type string
+  const hash = type.split("").reduce((acc, char) => {
+    return char.charCodeAt(0) + ((acc << 5) - acc);
+  }, 0);
+
+  // Convert hash to RGB values
+  let r = (hash & 0xff0000) >> 16;
+  let g = (hash & 0x00ff00) >> 8;
+  let b = hash & 0x0000ff;
+
+  // For background colors, make them lighter
+  // For background colors, make them darker by reducing RGB values
+
+  if (bg) {
+    const darkenFactor = 0.7; // Adjust this value to control darkness
+    r = Math.floor(r * darkenFactor);
+    g = Math.floor(g * darkenFactor);
+    b = Math.floor(b * darkenFactor);
+    return `#${r.toString(16).padStart(2, "0")}${g
+      .toString(16)
+      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  } else {
+    return `#${r.toString(16).padStart(2, "0")}${g
+      .toString(16)
+      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  }
+}
+
 export function cleanInputs(root_obj, start_index = 2, reset_value = true) {
   for (let i = 0; i < root_obj.outputs.length; i++) {
     const output = root_obj.outputs[i];
@@ -32,7 +61,7 @@ export function cleanInputs(root_obj, start_index = 2, reset_value = true) {
   for (let i = 0; i < max_node_input; i++) root_obj.removeInput(0);
 }
 
-export function clearInputs(root_obj, reset_value = true) {
+export function clearInputs(root_obj, reset_value = true, splice = 2) {
   //nodeData.input.required = {};
 
   if (!root_obj.widgets_values) root_obj.widgets_values = [];
@@ -65,7 +94,7 @@ export function clearInputs(root_obj, reset_value = true) {
     }
   }
 
-  root_obj.widgets = root_obj.widgets.splice(0, 2);
+  root_obj.widgets = root_obj.widgets.splice(0, splice);
   if (reset_value) {
     for (let key in root_obj.widgets_values) {
       if (key != "Name" && key != "type") {
@@ -87,11 +116,19 @@ export function clearInputs(root_obj, reset_value = true) {
 export function addOutputs(root_obj, workflow_name) {
   const outputs = app.lipsync_studio[workflow_name].outputs;
   for (let [key, value] of Object.entries(outputs)) {
-    const isoutput = root_obj.outputs.find(
-      (i) => i.name == value.inputs.Name.value
-    );
+    let name = "";
+    let type = "";
+    if (value.inputs.Name) {
+      name = value.inputs.Name.value;
+      type = value.inputs.type.value;
+    } else {
+      name = value.inputs[0];
+      type = value.inputs[1];
+    }
+
+    const isoutput = root_obj.outputs.find((i) => i.name == name);
     if (!isoutput) {
-      root_obj.addOutput(value.inputs.Name.value, value.inputs.type.value);
+      root_obj.addOutput(name, type);
     }
   }
   organizeOutputs(root_obj, workflow_name);
@@ -102,11 +139,18 @@ export function addInputs(node, inputs, widgets_values) {
   const mapped_input = Object.entries(inputs)
     .sort(([, a], [, b]) => a.position - b.position)
     .map(([, input], index) => {
+      let val = "";
+      if (input.inputs[1] == "COMBO") {
+        val = input.inputs[2][0];
+      } else {
+        val = input.inputs.length > 2 ? input.inputs[2] : undefined;
+      }
       return {
         name: input.inputs[0],
         type: input.inputs[1],
-        value: input.inputs.length > 2 ? input.inputs[2] : undefined,
+        value: val,
         orderIndex: index, // Ajouter un index d'ordre basé sur la position
+        options: input.inputs[1] == "COMBO" ? input.inputs[2][1] : undefined,
       };
     });
 
@@ -143,19 +187,35 @@ export function addInputs(node, inputs, widgets_values) {
 
   // Phase 2: Ajouter les nouveaux widgets/inputs avec leur index d'ordre
   for (const input of mapped_input) {
-    const { name, type, value, orderIndex } = input;
+    const { name, type, value, orderIndex, options } = input;
     let isWidget = node.widgets.find((w) => w.name === name);
-    let isinput = node.inputs.find((i) => i.name === name);
+    let isinput = node.inputs.filter((i) => i.name === name);
+
+    const seen = {};
+    const indexesToRemove = [];
+    node.inputs.forEach((input, idx) => {
+      if (seen[input.name] !== undefined) {
+        indexesToRemove.push(idx);
+      } else {
+        seen[input.name] = idx;
+      }
+    });
+    for (let i = indexesToRemove.length - 1; i >= 0; i--) {
+      node.removeInput(indexesToRemove[i]);
+    }
+    isinput = node.inputs.find((i) => i.name === name);
 
     if (!isWidget && (!isinput || isinput.widget)) {
       if (value !== undefined) {
         // Ajouter un widget avec sa valeur et son index d'ordre
-        let widget_param = { value, type };
+        let widget_param = { value, type, options };
         if (string_widget.includes(type))
           widget_param = { value, type: "STRING" };
         addWidgets(node, name, widget_param, app);
         isWidget = node.widgets.find((w) => w.name === name);
-        if (orderIndex !== undefined) isWidget.orderIndex = orderIndex; // Stocker l'index d'ordre// Stocker l'index d'ordre
+        if (isWidget) {
+          if (orderIndex !== undefined) isWidget.orderIndex = orderIndex; // Stocker l'index d'ordre// Stocker l'index d'ordre
+        }
 
         if (isinput && !isinput.widget) {
           convertToInput(node, isWidget);
@@ -344,9 +404,10 @@ export function addInputs(node, inputs, widgets_values) {
     }
 
     // Rafraîchir le canvas
+    /*
     if (node.graph) {
       node.graph.setDirtyCanvas(true);
-    }
+    }*/
   }
 
   // Rafraîchir le canvas si nécessaire
@@ -361,13 +422,21 @@ function organizeOutputs(node, workflow_name) {
   const outputs = app.lipsync_studio[workflow_name].outputs;
 
   // Extraire et trier les outputs selon leur position
-  const sortedOutputs = Object.entries(outputs)
+  let sortedOutputs;
+  sortedOutputs = Object.entries(outputs)
     .sort(([, a], [, b]) => a.position - b.position)
-    .map(([, output]) => ({
-      name: output.inputs.Name.value,
-      type: output.inputs.type.value,
-    }));
-
+    .map(([, output]) => {
+      let name = "";
+      let type = "";
+      if (output.inputs.length === undefined) {
+        name = output.inputs.Name.value;
+        type = output.inputs.type.value;
+      } else {
+        name = output.inputs[0];
+        type = output.inputs[1];
+      }
+      return { name, type };
+    });
   // Réorganiser les outputs selon l'ordre déterminé
   for (let i = 0; i < sortedOutputs.length; i++) {
     const targetOutput = sortedOutputs[i];

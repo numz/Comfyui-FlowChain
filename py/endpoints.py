@@ -7,31 +7,48 @@ from app.user_manager import UserManager
 
 
 def get_workflow_data(workflow_file):
-    nodes_input = {}
-    nodes_output = {}
-
-
+    nodes = {"WorkflowInput": {}, "WorkflowOutput": {}}
     # Extraire les nœuds WorkflowInput et WorkflowOutput
+    # print(workflow_file["nodes"]);
     for node in workflow_file["nodes"]:
-        if node.get("type") == "WorkflowInput":
+        
+        node_type = node.get("type")
+        if node_type in nodes.keys():
             # Convertir au format compatible pour le client
             node_id = str(node.get("id", "unknown"))
-            nodes_input[node_id] = {
-                "class_type": "WorkflowInput",
-                "inputs": node.get("widgets_values", {}),
-                "position": node.get("pos", {})[1]
-            }
-        elif node.get("type") == "WorkflowOutput":
-            node_id = str(node.get("id", "unknown"))
-            nodes_output[node_id] = {
-                "class_type": "WorkflowOutput",
-                "inputs": node.get("widgets_values", {}),
-                "position": node.get("pos", {})[1]
-            }
-        # sort by position
-        nodes_input = dict(sorted(nodes_input.items(), key=lambda item: item[1]["position"]))
-        nodes_output = dict(sorted(nodes_output.items(), key=lambda item: item[1]["position"]))
+            w_values = node.get("widgets_values", [])
+            inp = []
+            if node_type == "WorkflowInput":
+                if len(w_values) < 3:
+                    inp = [w_values[0], node.get("inputs",[])[0].get("type", "")]
+                    if len(w_values) == 2:
+                        inp.append(w_values[1])
+                else:
+                    inp = w_values
 
+            elif node_type == "WorkflowOutput":
+                #print(node.get("outputs",[]))
+                #print(w_values)
+                if ('Name' in w_values):
+                    inp = [w_values['Name']['value'], node.get("outputs",[])[0].get("type", "*")]
+                elif len(w_values) < 3:
+                    inp = [w_values[0], node.get("outputs",[])[0].get("type", "*")]
+                    if len(w_values) == 2:
+                        inp.append(w_values[1])
+                else:
+                    inp = w_values
+                #print(inp)
+            nodes[node_type][node_id] = {
+                "class_type": node_type,
+                "inputs": inp
+            }
+            if type(node.get("pos")) is list:
+                nodes[node_type][node_id]["position"] = node["pos"][1]
+            else:
+                nodes[node_type][node_id]["position"] = node["pos"]['1']
+        # sort by position
+    nodes_input = dict(sorted(nodes["WorkflowInput"].items(), key=lambda item: item[1]["position"]))
+    nodes_output = dict(sorted(nodes["WorkflowOutput"].items(), key=lambda item: item[1]["position"]))
     return {"inputs": nodes_input,
             "outputs": nodes_output,
             'workflow': workflow_file}
@@ -51,9 +68,11 @@ async def workflows(request):
                 # Ne traiter que les fichiers JSON
                 if file.lower().endswith('.json'):
                     file_path = os.path.join(root, file)
+                    
                     try:
                         with open(file_path, "r", encoding="utf-8") as f:
                             json_content = json.load(f)
+                        print(file_path);
                         relative_path = os.path.relpath(file_path, str(json_path))
                         if "nodes" in json_content:
                             file_conf = get_workflow_data(json_content)
@@ -64,7 +83,7 @@ async def workflows(request):
                         # Ignorer les fichiers JSON mal formés
                         print(f"Ignoring malformed JSON file: {file_path}")
                     except Exception as e:
-                        print(f"Error processing {file_path}: {str(e)}")
+                        print(f"Error processing, probably old format: {str(e)}")
     else:
         # Créer le répertoire s'il n'existe pas
         os.makedirs(json_path)

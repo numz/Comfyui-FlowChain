@@ -22,6 +22,7 @@ This repository includes a set of custom nodes for ComfyUI that allow you to:
 - [💻 Installation](#-installation)
 - [🕸️ Nodes](#-nodes)
 - [🐍 Usage](#-usage)
+- [📂 Export Nested Projects](#-Export-Nested-Projects)
 - [💪 Special things to know](#-special-things-to-know)
 - [📺 Examples](#-examples)
 - [😎 Contributing](#-contributing)
@@ -41,6 +42,12 @@ The idea came from the frustration users experienced with the many limitations a
 By solving these problems, my tool makes node management more intuitive, stable, and efficient, allowing you to focus on what matters: creating.
 
 ## 🚀 Updates
+
+**2025.05.17**
+
+- 💪 Now compatible with all node types: the output connection auto-detects WorkflowInput, and the default input detects WorkflowOutput.
+- 📂 New menu option **Workflow › Export Flowchain (ZIP)** bundles all nested workflows into a single ZIP archive for easier project sharing.
+- 🛠️ Retrocompatible with previous workflows version (I hope ^^).
 
 **2025.05.14**
 
@@ -134,7 +141,7 @@ After this command be created folder Comfyui-FlowChain
 
 ![Illustration](docs/assets/workflow2.png)
 
-Select a workflow from the **workflows** dropdown menu. This list displays all compatible workflows saved in your ComfyUI user directory:
+Select a workflow from the **workflows** dropdown menu. This list displays all compatible workflows saved in your ComfyUI **user directory**:
 
 `ComfyUI\user\default\workflows`
 
@@ -147,8 +154,7 @@ For a workflow to be considered **compatible**, it must contain at least one "Wo
 ![Illustration](docs/assets/input2.png)
 
 - Allow to declare inputs in your workflow.
-- Types available : **"IMAGE", "MASK", "STRING", "INT", "FLOAT", "LATENT", "BOOLEAN", "CLIP", "CONDITIONING", "MODEL", "VAE"**
-- Give a Name and select the type.
+- Give a Name
 - **Default** value is used when debugging your workflow or if you don't plug an input into the **Workflow** node.
 
 - ![Illustration](docs/assets/workflow5.png)
@@ -158,58 +164,10 @@ For a workflow to be considered **compatible**, it must contain at least one "Wo
 ![Illustration](docs/assets/output1.png)
 
 - Allow to declare outputs in your workflow.
-- Types available : **"IMAGE", "MASK", "STRING", "INT", "FLOAT", "LATENT", "BOOLEAN", "CLIP", "CONDITIONING", "MODEL", "VAE"**
 - Give a Name and select the type.
 - **Default** value is used to connect the output.
 
 ![Illustration](docs/assets/output2.png)
-
-# Add a Custom TYPE
-
-Because I can’t list every possible ComfyUI type, you can add your own TYPES. I can’t guarantee it’ll work for every possible type, but give it a shot, it should work for the vast majority.
-
-Just add your TYPES in :
-
-```
-workflow_nodes.py:
-node_type_list = ["none", "IMAGE", "MASK", "STRING", "INT", "FLOAT", "LATENT", "BOOLEAN", "CLIP", "CONDITIONING",
-"MODEL", "VAE"]
-```
-
-```
-web/js/constants.js :
-export const node_type_list = [
-"none",
-"IMAGE",
-"MASK",
-"STRING",
-"INT",
-"FLOAT",
-"LATENT",
-"CLIP",
-"CONDITIONING",
-"MODEL",
-"VAE",
-"BOOLEAN",
-"SWITCH",
-"AUDIO"
-];
-```
-
-if you have more than 20 types you must add new colors and background colors :
-
-```
-export const colors = [
-  "#222222",
-  "#5940bb",
-  ...
-]
-export const bg_colors = [
-  "#000000",
-  "#392978",
-  ...
-]
-```
 
 ## ⛓️ Continue Node
 
@@ -225,6 +183,14 @@ export const bg_colors = [
 - But When a workflow is loaded into the **"workflow"** Node, which contain a **"Workflow Continue"** node, it will be delete if **continue_workflow** is False. That allow to create conditional situation where you want to prevent computation of some parts.
 
 ![Illustration](docs/assets/continue5.png)
+
+## 📂 Export Nested Projects
+
+A new Menu is available in **workflow > Export Flowchain (Zip)**
+
+![Illustration](docs/assets/menu.png)
+
+Bundles all nested workflows into a single ZIP archive for easier project sharing.
 
 ## 🔉👄 Workflow LipSync Node
 

@@ -1,10 +1,80 @@
 import { chainCallback } from "./utils.js";
-import { clearInputs } from "./inputs.js";
-import { addWidgets } from "./widgets.js";
-import { colors, bg_colors, node_type_list } from "./constants.js";
-
+import { createColor } from "./inputs.js";
 
 function initialisation(node) {
+  node.onConnectionsChange = function (
+    slotType, //1 = input, 2 = output
+    slot,
+    isChangeConnect,
+    link_info,
+    output
+  ) {
+    if (link_info && node.graph && slotType == 1 && isChangeConnect) {
+      const fromNode = node.graph._nodes.find(
+        (otherNode) => otherNode.id == link_info.target_id
+      );
+
+      if (fromNode) {
+        const other_node = node.graph._nodes.find(
+          (otherNode) => otherNode.id == link_info.origin_id
+        );
+
+        const node_output = other_node.outputs[link_info.origin_slot];
+        if (node_output) {
+          const type = node_output.type;
+          node.widgets = node.widgets.splice(0, 1);
+          if (node.widgets_values && node.widgets_values.length === undefined) {
+            node.widgets_values = [node.widgets_values.Name.value];
+          } else {
+            if (node.widgets_values[0] === "") {
+              node.widgets_values = node_output.name;
+            }
+          }
+          if (node.inputs[2]) {
+            node.removeInput(1);
+          }
+          if (node.widgets[0].value === "") {
+            if (node.widgets_values.length == 1) {
+              node.widgets[0].value = node.widgets_values[0];
+            } else {
+              node.widgets[0].value = node_output.name;
+            }
+          }
+
+          node.outputs[0].type = type;
+          //node.widgets = node.widgets.splice(0, 1);
+          //node.widgets_values = node.widgets_values.splice(0, 1);
+
+          //node.inputs[0].type = node_input.type;
+          if (
+            !("widget" in node.inputs[0]) ||
+            node.inputs[0].widget == undefined
+          ) {
+            node.inputs[0].widget = undefined;
+          }
+
+          //node.local_input_defs.required["default"] = [type, null];
+          node.color = createColor(type);
+          node.bgcolor = createColor(type, true);
+        }
+      }
+    } else {
+      if (!isChangeConnect) {
+        node.inputs[1].type = "*";
+        node.outputs[0].type = "*";
+        node.widgets[0].value = "";
+
+        node.widgets = this.widgets.splice(0, 1);
+        if (node.widgets_values) {
+          node.widgets_values = [""];
+        }
+      }
+    }
+    //Update either way
+    //node.update();
+  };
+
+  /*
     node.widgets[1].callback =  ( value ) => {
         // D'abord, déconnecter tous les liens existants
         for (let i = 0; i < node.outputs.length; i++) {
@@ -35,100 +105,87 @@ function initialisation(node) {
         node.color = colors[node_type_list.indexOf(value)];
         node.bgcolor = bg_colors[node_type_list.indexOf(value)];
     };
-    if (node.widgets[1].value == "none") clearInputs(node);
-    node.color = colors[node_type_list.indexOf("none")];
-    node.bgcolor = bg_colors[node_type_list.indexOf("none")];
+    */
+  //if (node.widgets[1].value == "none") clearInputs(node);
+  node.color = createColor("none");
+  node.bgcolor = createColor("none", true);
 }
 
 function configure(info) {
-    let widgetDict = info.widgets_values
-    if (info.widgets_values.length == undefined) {
-
-        for (let w of this.widgets) {
-            if (w.name in widgetDict) {
-                w.value = widgetDict[w.name].value;
-            }
-        }
-        // check if widgetDict in this.widgets
-        for (let [key, value] of Object.entries(widgetDict)) {
-            let widget = this.widgets.find(w => w.name === key);
-            let type = this.widgets.find(w => w.name === "type");
-            if(!widget){
-                addWidgets(this, key, value, app);
-                widget = this.widgets.find(w => w.name === key);
-            }
-                //this.widgets.push(value);
-            widget.options = info.widgets_values[key].options;
-            widget.value = info.widgets_values[key].value;
-            //if value exists in inputs
-
-            for (let input of this.inputs){
-                if (input.name == key){
-                    //find if key exists in inputs array in inputs.Name
-                    if (info.widgets_values[key].type != "converted-widget"){
-                        this.removeInput(this.inputs.indexOf(input));
-                    }
-                    break;
-                }
-            }
-
-        }
-    }
-
-    for (let w of this.inputs){
-        if (w.name=="default"){
-            w.type = info.widgets_values.type.value;
-        }
-    }
-    if (info.outputs_values != undefined){
-        // deep copy outputs
-        if(this.id == -1){
-            this.outputs[0] = {links: null, name: info.outputs_values.name, type: info.outputs_values.type};
-        }else{
-            this.outputs[0] = {...info.outputs_values};
-        }
-    }
-
+  if (info.widgets_values.length == undefined) {
+    let widgetDict = info.widgets_values;
+    info.widgets_values = [info.widgets_values.Name.value];
+  }
+  if (this.inputs.length > 2) {
+    this.removeInput(1);
+  }
+  this.widgets = this.widgets.splice(0, 1);
+  /*
+  if (this.inputs[1].link) {
+    this.onConnectionsChange(
+      1,
+      1,
+      true,
+      this.graph.links[this.inputs[1].link],
+      this.graph.links[this.inputs[1].link].origin_id
+    );
+  }*/
 }
 
 function serialize(info) {
+  /*
     info.widgets_values = {};
-    if (!this.widgets) {
-        return;
-    }
+  if (!this.widgets) {
+    return;
+  }
 
-    for (let w of this.widgets) {
-        info.widgets_values[w.name] = {name: w.name, options : w.options, value: w.value, type: w.type, origType: w.origType, last_y: w.last_y};
-    }
+  for (let w of this.widgets) {
+    info.widgets_values[w.name] = {
+      name: w.name,
+      options: w.options,
+      value: w.value,
+      type: w.type,
+      origType: w.origType,
+      last_y: w.last_y,
+    };
+  }
 
-
-    for (let w of this.inputs){
-        // if w.name exists in info.widgets_values
-        if (info.widgets_values[w.name]){
-            if(info.widgets_values[w.name].type == "converted-widget"){
-                if(info.widgets_values[w.name].origType == "toggle"){
-                    w.type = "BOOLEAN";
-                }else if(info.widgets_values[w.name].origType == "text"){
-                    w.type = "STRING";
-                }
-            }
+  for (let w of this.inputs) {
+    // if w.name exists in info.widgets_values
+    if (info.widgets_values[w.name]) {
+      if (info.widgets_values[w.name].type == "converted-widget") {
+        if (info.widgets_values[w.name].origType == "toggle") {
+          w.type = "BOOLEAN";
+        } else if (info.widgets_values[w.name].origType == "text") {
+          w.type = "STRING";
         }
+      }
     }
-    if (this.outputs.length > 0){
-        if (this.outputs[0].links == null){
-            info.outputs_values = {links: null, name: this.outputs[0].name, type: this.outputs[0].type};
-        }else{
-            info.outputs_values = {links: [...this.outputs[0].links], name: this.outputs[0].name, slot_index: this.outputs[0].slot_index, type: this.outputs[0].type};
-        }
+  }
+  if (this.outputs.length > 0) {
+    if (this.outputs[0].links == null) {
+      info.outputs_values = {
+        links: null,
+        name: this.outputs[0].name,
+        type: this.outputs[0].type,
+      };
+    } else {
+      info.outputs_values = {
+        links: [...this.outputs[0].links],
+        name: this.outputs[0].name,
+        slot_index: this.outputs[0].slot_index,
+        type: this.outputs[0].type,
+      };
     }
-    this.setSize(info.size);
+  }
+  this.setSize(info.size);
+  */
 }
 
 export function setupOutputNode(nodeType) {
-
-    nodeType.prototype.onNodeCreated =  function() {
-        chainCallback(this, "onConfigure", configure);
-        chainCallback(this, "onSerialize", serialize);
-        initialisation(this);
-    }
+  nodeType.prototype.onNodeCreated = function () {
+    chainCallback(this, "onConfigure", configure);
+    chainCallback(this, "onSerialize", serialize);
+    initialisation(this);
+  };
 }

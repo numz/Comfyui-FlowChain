@@ -329,6 +329,7 @@ class Workflow(SaveImage):
 
             sub_outputs_with_position.sort(key=lambda x: x[1])
             sub_output_nodes = {k: sub_output_nodes[k] for k, _ in sub_outputs_with_position}
+
                 
             workflow_copy = copy.deepcopy(workflow)
             for node_id, node in workflow_copy.items():
@@ -488,6 +489,7 @@ class Workflow(SaveImage):
             
         simple_server = SimpleServer()
         executor = PromptExecutor(simple_server)
+        
         executor.execute(workflow, prompt_id, {"client_id": client_id}, workflow_outputs_id)
 
         history_result = executor.history_result

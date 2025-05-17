@@ -8,6 +8,50 @@ function initialisation_preGraph(node) {
   node.color = "#004670";
   node.bgcolor = "#002942";
 
+  node.onConnectionsChange = function (
+    slotType, //1 = input, 2 = output
+    slot,
+    isChangeConnect,
+    link_info,
+    output
+  ) {
+    if (link_info && node.graph && slotType == 1 && isChangeConnect) {
+      const fromNode = node.graph._nodes.find(
+        (otherNode) => otherNode.id == link_info.target_id
+      );
+      if (fromNode) {
+        const other_node = node.graph._nodes.find(
+          (otherNode) => otherNode.id == link_info.origin_id
+        );
+        if (other_node.type == "WorkflowInput") {
+          const node_output = other_node.outputs[link_info.origin_slot];
+          if (node_output) {
+            const type = node_output.type;
+            other_node.onConnectionsChange(2, 1, true, link_info, node);
+          }
+        }
+      }
+    } else if (link_info && node.graph && slotType == 2 && isChangeConnect) {
+      const fromNode = node.graph._nodes.find(
+        (otherNode) => otherNode.id == link_info.origin_id
+      );
+      if (fromNode) {
+        const other_node = node.graph._nodes.find(
+          (otherNode) => otherNode.id == link_info.target_id
+        );
+        if (other_node.type == "WorkflowOutput") {
+          const node_input = other_node.inputs[link_info.target_slot];
+          if (node_input) {
+            const type = node_input.type;
+            other_node.onConnectionsChange(1, 2, true, link_info, node);
+          }
+        }
+      }
+    }
+    //Update either way
+    //node.update();
+  };
+
   // Basic widget setup that doesn't depend on the graph
   if (node.widgets && node.widgets[0] && node.widgets[0].options) {
     if (app && app.lipsync_studio) {
@@ -56,14 +100,29 @@ function initialisation_preGraph(node) {
         // For example, explicitly removing all but the essential widgets/inputs/outputs.
       } else if (app && app.lipsync_studio && app.lipsync_studio[value]) {
         try {
-          const workflowJSON = await importWorkflow(node, value, app); // importWorkflow updates node.title
-          if (node.widgets && node.widgets[1]) {
-            node.widgets[1].value = workflowJSON;
-          }
-
+          let workflowJSON = await importWorkflow(node, value, app); // importWorkflow updates node.title
+          workflowJSON = JSON.parse(workflowJSON);
           // Ensure app.lipsync_studio[value] (and its .inputs) is still valid after await
           if (app.lipsync_studio[value] && app.lipsync_studio[value].inputs) {
             const inputs = app.lipsync_studio[value].inputs;
+            const outputs = app.lipsync_studio[value].outputs;
+            for (let [key, value] of Object.entries(inputs)) {
+              workflowJSON[key]["inputs"]["type"] = value["inputs"][1];
+            }
+            for (let [key, value] of Object.entries(outputs)) {
+              if (value["inputs"].length === undefined) {
+                workflowJSON[key]["inputs"]["type"] =
+                  value["inputs"].type.value;
+              } else {
+                workflowJSON[key]["inputs"]["type"] = value["inputs"][1];
+              }
+            }
+            workflowJSON = JSON.stringify(workflowJSON);
+
+            if (node.widgets && node.widgets[1]) {
+              node.widgets[1].value = workflowJSON;
+            }
+
             addInputs(node, inputs, []); // Requires node.graph
             addOutputs(node, value); // Requires node.graph
             fitHeight(node);
@@ -225,8 +284,21 @@ function configure(info) {
       importWorkflow(this, selectedWorkflowName, app)
         .then((data) => {
           if (data) {
-            this.widgets[1].value = data;
+            const data_json = JSON.parse(data);
             const inputs = app.lipsync_studio[selectedWorkflowName].inputs;
+            const outputs = app.lipsync_studio[selectedWorkflowName].outputs;
+
+            for (let [key, value] of Object.entries(inputs)) {
+              data_json[key]["inputs"]["type"] = value["inputs"][1];
+            }
+            for (let [key, value] of Object.entries(outputs)) {
+              if (value["inputs"].length === undefined) {
+                data_json[key]["inputs"]["type"] = value["inputs"].type.value;
+              } else {
+                data_json[key]["inputs"]["type"] = value["inputs"][1];
+              }
+            }
+            this.widgets[1].value = JSON.stringify(data_json);
 
             addInputs(this, inputs, info.widgets_values);
             addOutputs(this, selectedWorkflowName);

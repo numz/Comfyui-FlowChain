@@ -19,7 +19,7 @@ BOOLEAN = ("BOOLEAN", {"default": True})
 STRING = ("STRING", {"default": ""})
 any_input = AnyType("*")
 node_type_list = ["none", "IMAGE", "MASK", "STRING", "INT", "FLOAT", "LATENT", "BOOLEAN", "CLIP", "CONDITIONING",
-                  "MODEL", "VAE"]
+                  "MODEL", "VAE", "DICT", "AUDIO", "AUDIO_PATH", "VIDEO_PATH", "AUDIO/VIDEO_PATH", "DOC_PATH", "IMAGE_PATH", "PROMPT"]
 
 
 class WorkflowContinue:
@@ -73,7 +73,7 @@ class WorkflowInput:
     def INPUT_TYPES(cls):
         return {"required": {
             "Name": STRING,
-            "type": (node_type_list,),
+            #"type": (node_type_list,),
             "default": ("*",)
         }}
 
@@ -85,20 +85,21 @@ class WorkflowInput:
     # OUTPUT_NODE = True
 
     @classmethod
-    def IS_CHANGED(s, Name, type, default, **kwargs):
+    def IS_CHANGED(s, Name,default, **kwargs):
         m = hashlib.sha256()
         if default is not None:
             m.update(str(default).encode())
         else:
             m.update(Name.encode() + type.encode())
         return m.digest().hex()
-
+    
     @classmethod
     def VALIDATE_INPUTS(cls, input_types):
         return True
 
-    def execute(self, Name, type, default, **kwargs):
-        return (default,)
+
+    def execute(self, Name, **kwargs):
+        return (kwargs["default"],)
 
 
 class WorkflowOutput:
@@ -107,10 +108,11 @@ class WorkflowOutput:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {
-            "Name": STRING,
-            "type": (node_type_list,)
-        },
+        return {
+            "required": {
+                "Name": STRING,
+                #"type": (node_type_list,)
+            },
             "hidden": {
                 "ui": BOOLEAN
             }}
@@ -123,17 +125,18 @@ class WorkflowOutput:
 
 
     @classmethod
-    def IS_CHANGED(s, Name, type, ui=True, **kwargs):
+    def IS_CHANGED(s, Name, ui=True, **kwargs):
         m = hashlib.sha256()
-        m.update(Name.encode() + type.encode())
+        m.update(Name.encode())
         return m.digest().hex()
 
-    def execute(self, Name, type, ui=True, **kwargs):
+    def execute(self, Name, ui=True, **kwargs):
         if ui:
             if kwargs["default"] is None:
                 return (torch.tensor([]),)
             return (kwargs["default"],)
         else:
+            """
             if type in ["IMAGE", "MASK"]:
                 if kwargs["default"] is None:
                     black_image_np = np.zeros((255, 255, 3), dtype=np.uint8)
@@ -149,9 +152,10 @@ class WorkflowOutput:
                     return {"ui": {"default": torch.tensor([])}}
                 return {"ui": {"default": [kwargs["default"]]}}
             else:
-                ui = {"ui": {}}
-                ui["ui"]["default"] = [kwargs["default"]]
-                return ui
+            """
+            ui = {"ui": {}}
+            ui["ui"]["default"] = [kwargs["default"]]
+            return ui
 
 
 NODE_CLASS_MAPPINGS_NODES = {

@@ -12,6 +12,9 @@ export function getDefaultOptions(type, value = 0) {
     case "STRING":
       options = { default: value };
       break;
+    case "COMBO":
+      options = { default: value, values: ["option1", "option2", "option3"] };
+      break;
     default:
       options = {};
   }
@@ -86,7 +89,18 @@ export function addWidgets(root_obj, field_name, value, app) {
       getDefaultOptions("BOOLEAN", value.value),
     ];
   }
-  /*
+  if (type == "COMBO") {
+    ComfyWidgets.COMBO(
+      root_obj,
+      field_name,
+      ["COMBO", getDefaultOptions("COMBO", value.value)],
+      app
+    );
+    root_obj.widgets[root_obj.widgets.length - 1].options = value.options;
+    root_obj.addInput(field_name, "COMBO", { widget: { name: field_name } });
+    root_obj.local_input_defs.required[field_name] = ["COMBO", value.options];
+  }
+  /*ComfyWidgets.
     if (field_name == "workflow"){
         root_obj.addWidget("STRING", field_name, value.value, ()=>{});
         root_obj.widgets[root_obj.widgets.length - 1].hidden = true;
