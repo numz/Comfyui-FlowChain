@@ -59,13 +59,15 @@ function initialisation_preGraph(node) {
           }
           node.widgets = node.widgets.splice(0, 1);
           if (node.widgets_values) {
-            if (node.widgets_values.length == 3) {
+            if (node.widgets_values.length == 3 && type !== "COMBO") {
               node.widgets_values = [
                 node.widgets_values[0],
                 node.widgets_values[2],
               ];
             } else {
-              node.widgets_values = node.widgets_values.splice(0, 2);
+              if (type !== "COMBO") {
+                node.widgets_values = node.widgets_values.splice(0, 2);
+              }
             }
           }
           if (node.inputs[2]) {
@@ -147,15 +149,18 @@ function initialisation_preGraph(node) {
             case "COMBO":
               node.outputs[0].type = "COMBO";
               ComfyWidgets.COMBO(node, "default", ["COMBO", options], app);
-              if (node.widgets_values && node.widgets_values.length == 2) {
-                node.widgets[1].value = node.widgets_values[1][0];
+              if (node.widgets_values && node.widgets_values.length == 3) {
+                node.widgets[1].value = node.widgets_values[1];
               } else {
                 node.widgets[1].value = widget_input.value;
               }
               if (options.values.length > 0) {
                 node.widgets[1].options = options;
               } else {
-                node.widgets[1].options = node.widgets_values[1][1];
+                if (node.widgets_values && node.widgets_values.length == 3) {
+                  options = node.widgets_values[2];
+                  node.widgets[1].options = options;
+                }
               }
               node.inputs[0].type = node_input ? node_input.type : "*";
               if (
@@ -341,7 +346,10 @@ function initialisation_onAdded(node) {
 }
 
 function configure(info) {
-  if (info.widgets_values.length == 3) {
+  if (
+    info.widgets_values.length == 3 &&
+    (!this.widgets[1] || (this.widgets[1] && this.widgets[1].type !== "combo"))
+  ) {
     info.widgets_values = [info.widgets_values[0], info.widgets_values[2]];
   }
   //info.widgets_values = [info.widgets_values[0], info.widgets_values[1]];
@@ -389,7 +397,8 @@ function serialize(info) {
 
   if (this.inputs[0].type == "COMBO") {
     if (this.widgets[1].options.values.length > 0) {
-      info.widgets_values[1] = [this.widgets[1].value, this.widgets[1].options];
+      info.widgets_values[1] = this.widgets[1].value;
+      info.widgets_values[2] = this.widgets[1].options;
     }
   }
 }

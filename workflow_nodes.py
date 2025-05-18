@@ -112,6 +112,7 @@ class WorkflowOutput:
             "required": {
                 "Name": STRING,
                 #"type": (node_type_list,)
+                "default": ("*",)
             },
             "hidden": {
                 "ui": BOOLEAN
@@ -130,6 +131,10 @@ class WorkflowOutput:
         m.update(Name.encode())
         return m.digest().hex()
 
+    @classmethod
+    def VALIDATE_INPUTS(cls, input_types):
+        return True
+    
     def execute(self, Name, ui=True, **kwargs):
         if ui:
             if kwargs["default"] is None:

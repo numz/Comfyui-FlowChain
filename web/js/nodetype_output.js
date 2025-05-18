@@ -26,15 +26,13 @@ function initialisation(node) {
           if (node.widgets_values && node.widgets_values.length === undefined) {
             node.widgets_values = [node.widgets_values.Name.value];
           } else {
-            if (node.widgets_values[0] === "") {
-              node.widgets_values = node_output.name;
-            }
+            node.widgets_values = [node_output.name];
           }
           if (node.inputs[2]) {
             node.removeInput(1);
           }
           if (node.widgets[0].value === "") {
-            if (node.widgets_values.length == 1) {
+            if (node.widgets_values && node.widgets_values.length == 1) {
               node.widgets[0].value = node.widgets_values[0];
             } else {
               node.widgets[0].value = node_output.name;
