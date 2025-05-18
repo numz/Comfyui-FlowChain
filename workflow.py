@@ -63,7 +63,10 @@ class Workflow(SaveImage):
                 "workflows": ("COMBO", {"values": []}),
                 "workflow": ("STRING", {"default": ""})
             },
-            "optional": {}
+            "optional": {},
+            "hidden": {
+                "unique_id": "UNIQUE_ID",
+            }
         }
 
     RETURN_TYPES = (
@@ -116,7 +119,7 @@ class Workflow(SaveImage):
 
         return m.digest().hex()
 
-    def generate(self, workflows, workflow, **kwargs):
+    def generate(self, workflows, workflow, unique_id, **kwargs):
 
         def populate_inputs(workflow, inputs, kwargs_values):
             workflow_inputs = {k: v for k, v in workflow.items() if  "class_type" in v and v["class_type"] == "WorkflowInput"}
@@ -436,8 +439,7 @@ class Workflow(SaveImage):
             
             # Now you can access the original inputs as before
             queue_to_use = queue_info["queue_running"]
-            original_inputs = [v["inputs"] for k, v in queue_to_use[0][2].items() if
-                            "workflows" in v["inputs"] and v["inputs"]["workflows"] == workflows][0]
+            original_inputs = [v["inputs"] for k, v in queue_to_use[0][2].items() if k == unique_id][0]
 
         else:
             # Fallback to empty inputs if server instance not available
@@ -461,9 +463,15 @@ class Workflow(SaveImage):
                 if "nodes" in original_workflow:
                     for node in original_workflow["nodes"]:
                         if node.get("type") == "WorkflowOutput":
-                            node_id = str(node.get("id", "unknown"))
+                            # node_id = str(node.get("id", "unknown"))
                             pos_y = node.get("pos", [0, 0])[1]
-                            node_name = node.get("widgets_values", "")["Name"]["value"]
+                            
+                            w_values = node.get("widgets_values", "")
+                            if "Name" in w_values:
+                                node_name = w_values["Name"]["value"]
+                            else:
+                                node_name = w_values[0]
+
                             original_positions[node_name] = pos_y
             except Exception as e:
                 print(f"Erreur lors de la lecture du fichier workflow original: {str(e)}")

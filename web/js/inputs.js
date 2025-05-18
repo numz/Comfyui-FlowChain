@@ -131,6 +131,13 @@ export function addOutputs(root_obj, workflow_name) {
       root_obj.addOutput(name, type);
     }
   }
+  // remove out not in outputs
+  const all_outputs = Object.entries(outputs).map(([key, value]) => value);
+  for (let i = 0; i < root_obj.outputs.length; i++) {
+    if (!all_outputs.find((out) => out.inputs[0] == root_obj.outputs[i].name)) {
+      root_obj.removeOutput(i);
+    }
+  }
   organizeOutputs(root_obj, workflow_name);
 }
 

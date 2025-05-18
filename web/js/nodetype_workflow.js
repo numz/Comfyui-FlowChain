@@ -302,7 +302,14 @@ function configure(info) {
               if (value["inputs"].length === undefined) {
                 data_json[key]["inputs"]["type"] = value["inputs"].type.value;
               } else {
-                data_json[key]["inputs"]["type"] = value["inputs"][1];
+                if (
+                  value["inputs"][2]?.values &&
+                  value["inputs"][2].values.length > 0
+                ) {
+                  data_json[key]["inputs"]["type"] = "COMBO";
+                } else {
+                  data_json[key]["inputs"]["type"] = value["inputs"][1];
+                }
               }
             }
             this.widgets[1].value = JSON.stringify(data_json);
