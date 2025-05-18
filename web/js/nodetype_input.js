@@ -52,7 +52,7 @@ function initialisation_preGraph(node) {
               widget_input = other_node.widgets.find(
                 (w) => w.name == node_input.widget.name
               );
-              if ("options" in widget_input) {
+              if (widget_input && "options" in widget_input) {
                 options = widget_input.options;
               }
             }

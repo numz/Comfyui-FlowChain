@@ -140,17 +140,19 @@ export function addInputs(node, inputs, widgets_values) {
     .sort(([, a], [, b]) => a.position - b.position)
     .map(([, input], index) => {
       let val = "";
-      if (input.inputs[1] == "COMBO") {
-        val = input.inputs[2][0];
+      let type = input.inputs[1];
+      if (input.inputs[2]?.values?.length > 0) {
+        type = "COMBO";
+        val = input.inputs[1];
       } else {
         val = input.inputs.length > 2 ? input.inputs[2] : undefined;
       }
       return {
         name: input.inputs[0],
-        type: input.inputs[1],
+        type: type,
         value: val,
         orderIndex: index, // Ajouter un index d'ordre basé sur la position
-        options: input.inputs[1] == "COMBO" ? input.inputs[2][1] : undefined,
+        options: type == "COMBO" ? input.inputs[2] : undefined,
       };
     });
 

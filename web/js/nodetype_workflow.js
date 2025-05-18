@@ -107,7 +107,14 @@ function initialisation_preGraph(node) {
             const inputs = app.lipsync_studio[value].inputs;
             const outputs = app.lipsync_studio[value].outputs;
             for (let [key, value] of Object.entries(inputs)) {
-              workflowJSON[key]["inputs"]["type"] = value["inputs"][1];
+              if (
+                value["inputs"][2]?.values &&
+                value["inputs"][2].values.length > 0
+              ) {
+                workflowJSON[key]["inputs"]["type"] = "COMBO";
+              } else {
+                workflowJSON[key]["inputs"]["type"] = value["inputs"][1];
+              }
             }
             for (let [key, value] of Object.entries(outputs)) {
               if (value["inputs"].length === undefined) {
