@@ -87,7 +87,7 @@ function initialisation_preGraph(node) {
               if (node.widgets_values && node.widgets_values.length == 2) {
                 node.widgets[1].value = node.widgets_values[1];
               } else {
-                node.widgets[1].value = widget_input.value;
+                node.widgets[1].value = widget_input ? widget_input.value : "";
               }
               node.widgets[1].options = options;
 
@@ -110,7 +110,7 @@ function initialisation_preGraph(node) {
               if (node.widgets_values && node.widgets_values.length == 2) {
                 node.widgets[1].value = node.widgets_values[1];
               } else {
-                node.widgets[1].value = widget_input.value;
+                node.widgets[1].value = widget_input ? widget_input.value : "";
               }
               node.widgets[1].options = options;
               node.inputs[0].type = node_input ? node_input.type : "*";
@@ -131,7 +131,7 @@ function initialisation_preGraph(node) {
               if (node.widgets_values && node.widgets_values.length == 2) {
                 node.widgets[1].value = node.widgets_values[1];
               } else {
-                node.widgets[1].value = widget_input.value;
+                node.widgets[1].value = widget_input ? widget_input.value : "";
               }
               node.widgets[1].options = options;
               node.inputs[0].type = node_input ? node_input.type : "*";
@@ -152,7 +152,7 @@ function initialisation_preGraph(node) {
               if (node.widgets_values && node.widgets_values.length == 3) {
                 node.widgets[1].value = node.widgets_values[1];
               } else {
-                node.widgets[1].value = widget_input.value;
+                node.widgets[1].value = widget_input ? widget_input.value : "";
               }
               if (options.values.length > 0) {
                 node.widgets[1].options = options;
@@ -199,7 +199,9 @@ function initialisation_preGraph(node) {
                 if (node.widgets_values && node.widgets_values.length == 2) {
                   node.widgets[1].value = node.widgets_values[1];
                 } else {
-                  node.widgets[1].value = widget_input.value;
+                  node.widgets[1].value = widget_input
+                    ? widget_input.value
+                    : "";
                 }
                 node.widgets[1].options = options;
                 node.inputs[0].type = node_input ? node_input.type : "*";
