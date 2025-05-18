@@ -82,7 +82,7 @@ function initialisation_preGraph(node) {
             case "INT":
               node.outputs[0].type = "INT";
               ComfyWidgets.INT(node, "default", ["INT", options], app);
-              if (node.widgets_values.length == 2) {
+              if (node.widgets_values && node.widgets_values.length == 2) {
                 node.widgets[1].value = node.widgets_values[1];
               } else {
                 node.widgets[1].value = widget_input.value;
@@ -105,7 +105,7 @@ function initialisation_preGraph(node) {
               node.outputs[0].type = "FLOAT";
 
               ComfyWidgets.FLOAT(node, "default", ["FLOAT", options], app);
-              if (node.widgets_values.length == 2) {
+              if (node.widgets_values && node.widgets_values.length == 2) {
                 node.widgets[1].value = node.widgets_values[1];
               } else {
                 node.widgets[1].value = widget_input.value;
@@ -126,7 +126,7 @@ function initialisation_preGraph(node) {
             case "BOOLEAN":
               node.outputs[0].type = "BOOLEAN";
               node.addWidget("toggle", "default", false, () => {});
-              if (node.widgets_values.length == 2) {
+              if (node.widgets_values && node.widgets_values.length == 2) {
                 node.widgets[1].value = node.widgets_values[1];
               } else {
                 node.widgets[1].value = widget_input.value;
@@ -147,7 +147,7 @@ function initialisation_preGraph(node) {
             case "COMBO":
               node.outputs[0].type = "COMBO";
               ComfyWidgets.COMBO(node, "default", ["COMBO", options], app);
-              if (node.widgets_values.length == 2) {
+              if (node.widgets_values && node.widgets_values.length == 2) {
                 node.widgets[1].value = node.widgets_values[1][0];
               } else {
                 node.widgets[1].value = widget_input.value;
@@ -191,7 +191,7 @@ function initialisation_preGraph(node) {
                   app
                 );
 
-                if (node.widgets_values.length == 2) {
+                if (node.widgets_values && node.widgets_values.length == 2) {
                   node.widgets[1].value = node.widgets_values[1];
                 } else {
                   node.widgets[1].value = widget_input.value;
