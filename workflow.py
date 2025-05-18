@@ -322,7 +322,11 @@ class Workflow(SaveImage):
                             if node.get("type") == "WorkflowOutput":
                                 node_id = str(node.get("id", "unknown"))
                                 pos_y = node.get("pos", [0, 0])[1]
-                                node_name = node.get("widgets_values", "")["Name"]["value"]
+                                w_values = node.get("widgets_values", "")
+                                if "Name" in w_values:
+                                    node_name = w_values["Name"]["value"]
+                                else:
+                                    node_name = w_values[0]
                                 sub_original_positions[node_name] = pos_y
                 except Exception as e:
                     print(f"Error reading sub-workflow file: {str(e)}")
@@ -405,7 +409,11 @@ class Workflow(SaveImage):
                                 if node.get("type") == "WorkflowOutput":
                                     node_id = str(node.get("id", "unknown"))
                                     pos_y = node.get("pos", [0, 0])[1]
-                                    node_name = node.get("widgets_values", "")["Name"]["value"]
+                                    w_values = node.get("widgets_values", "")
+                                    if "Name" in w_values:
+                                        node_name = w_values["Name"]["value"]
+                                    else:
+                                        node_name = w_values[0]
                                     sub_original_positions[node_name] = pos_y
                     except Exception as e:
                         print(f"Error reading sub-workflow file: {str(e)}")
