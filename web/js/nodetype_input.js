@@ -247,13 +247,16 @@ function initialisation_preGraph(node) {
     } else {
       if (!isChangeConnect) {
         if (this.outputs[0].links && this.outputs[0].links.length == 0) {
-          this.inputs[0].type = "*";
+          //this.inputs[0].type = "*";
           this.outputs[0].type = "*";
           this.widgets[0].value = "";
           this.widgets = this.widgets.splice(0, 1);
           if (this.widgets_values) {
             this.widgets_values = this.widgets_values.splice(0, 1);
           }
+          this.inputs[0].type = "*";
+          this.inputs[0].widget = undefined;
+          this.inputs[0].pos = undefined;
         }
       }
     }
