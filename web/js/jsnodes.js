@@ -60,7 +60,7 @@ async function recursiveZip(nodes, zipInstance) {
       //const safePath = path.replace(/[^a-zA-Z0-9/._-]/g, "_");
       //const fileNameInZip = path.endsWith(".json") ? path : `${safePath}.json`;
 
-      zipInstance.file(path, JSON.stringify(jsonFile, null, 2));
+      zipInstance.file(path, JSON.stringify(jsonFile["workflow"], null, 2));
       console.log(`Added ${path} to zip.`);
 
       if (jsonFile && jsonFile.workflow && jsonFile.workflow.nodes) {

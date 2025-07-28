@@ -288,14 +288,14 @@ class Workflow(SaveImage):
 
             return subworkflow
 
-        def merge_inputs_outputs(workflow, workflow_name, subworkflow, workflow_outputs):
+        def merge_inputs_outputs(workflow, workflow_name, subworkflow, workflow_outputs, do_not_delete):
             # get max workflow id
             # coinvert workflow_outputs to list
             workflow_outputs = list(workflow_outputs.values())
             # prendre le premier workflow
             workflow_node = [{"id":k, **v} for k, v in workflow.items() if "class_type" in v and v["class_type"] == "Workflow" and v["inputs"]["workflows"] == workflow_name][0]
             sub_input_nodes = {k: v for k, v in subworkflow.items() if "class_type" in v and v["class_type"] == "WorkflowInput"}
-            do_not_delete = []
+            #do_not_delete = []
             for sub_id, sub_node in sub_input_nodes.items():
                 if sub_node["inputs"]["Name"] in workflow_node["inputs"]:
                     value = workflow_node["inputs"][sub_node["inputs"]["Name"]]
@@ -357,7 +357,7 @@ class Workflow(SaveImage):
             # remove output node
             subworkflow = {k: v for k, v in subworkflow.items() if not ("class_type" in v and v["class_type"] == "WorkflowOutput")}
 
-            return workflow, subworkflow
+            return workflow, subworkflow, do_not_delete
 
         def clean_workflow(workflow, inputs=None, kwargs_values=None):
             if kwargs_values is None:
@@ -377,7 +377,7 @@ class Workflow(SaveImage):
             workflow = recursive_delete(workflow, switch_to_delete + continue_to_delete)
             return workflow, workflow_outputs
 
-        def get_recursive_workflow(workflow_name, workflows, max_id=0):
+        def get_recursive_workflow(workflow_name, workflows, max_id=0,do_not_delete = []):
             # if workflows[-5:] == ".json":
             #    workflow = get_workflow(workflows)
             # else:
@@ -390,10 +390,11 @@ class Workflow(SaveImage):
 
             workflow, max_id = redefine_id(workflow, max_id)
             sub_workflows = {k: v for k, v in workflow.items() if "class_type" in v and v["class_type"] == "Workflow"}
+            
             for key, sub_workflow_node in sub_workflows.items():
                 workflow_json = sub_workflow_node["inputs"]["workflow"]
                 sub_workflow_name = sub_workflow_node["inputs"]["workflows"]
-                subworkflow, max_id = get_recursive_workflow(sub_workflow_name, workflow_json, max_id)
+                subworkflow, max_id, do_not_delete = get_recursive_workflow(sub_workflow_name, workflow_json, max_id, do_not_delete)
 
                 # get sub workflow file path
                 sub_workflow_file_path = os.path.join(folder_paths.user_directory, "default", "workflows", sub_workflow_name)
@@ -430,11 +431,11 @@ class Workflow(SaveImage):
                 sub_outputs_with_position.sort(key=lambda x: x[1])
                 workflow_outputs_sub = {k: workflow_outputs_sub[k] for k, _ in sub_outputs_with_position}
 
-                workflow, subworkflow = merge_inputs_outputs(workflow, sub_workflow_name, subworkflow, workflow_outputs_sub)
+                workflow, subworkflow, do_not_delete = merge_inputs_outputs(workflow, sub_workflow_name, subworkflow, workflow_outputs_sub, do_not_delete)
                 workflow = {k: v for k, v in workflow.items() if k != key}
                 # add subworkflow to workflow
                 workflow.update(subworkflow)
-            return workflow, max_id
+            return workflow, max_id, do_not_delete
         
         server_instance = PromptServer.instance
         client_id = server_instance.client_id
@@ -453,7 +454,7 @@ class Workflow(SaveImage):
             # Fallback to empty inputs if server instance not available
             original_inputs = {}
         
-        workflow, _ = get_recursive_workflow(workflows, workflow, 5000)
+        workflow, _, _ = get_recursive_workflow(workflows, workflow, 5000, [])
         workflow, workflow_outputs = clean_workflow(workflow, original_inputs, kwargs)
         
         # Accéder au fichier JSON original pour obtenir les positions correctes
