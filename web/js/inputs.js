@@ -209,8 +209,10 @@ export function addInputs(node, inputs, widgets_values) {
         seen[input.name] = idx;
       }
     });
-    for (let i = indexesToRemove.length - 1; i >= 0; i--) {
-      node.removeInput(indexesToRemove[i]);
+    if (node.graph._nodes){
+      for (let i = indexesToRemove.length - 1; i >= 0; i--) {
+        node.removeInput(indexesToRemove[i]);
+      }
     }
     isinput = node.inputs.find((i) => i.name === name);
 
