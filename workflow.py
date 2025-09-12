@@ -119,7 +119,7 @@ class Workflow(SaveImage):
 
         return m.digest().hex()
 
-    def generate(self, workflows, workflow, unique_id, **kwargs):
+    async def generate(self, workflows, workflow, unique_id, **kwargs):
 
         def populate_inputs(workflow, inputs, kwargs_values):
             workflow_inputs = {k: v for k, v in workflow.items() if  "class_type" in v and v["class_type"] == "WorkflowInput"}
@@ -513,7 +513,7 @@ class Workflow(SaveImage):
         simple_server = SimpleServer()
         executor = PromptExecutor(simple_server)
         
-        executor.execute(workflow, prompt_id, {"client_id": client_id}, workflow_outputs_id)
+        await executor.execute_async(workflow, prompt_id, {"client_id": client_id}, workflow_outputs_id)
 
         history_result = executor.history_result
         comfy.model_management.unload_all_models()
