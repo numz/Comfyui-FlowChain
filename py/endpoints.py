@@ -9,7 +9,6 @@ from app.user_manager import UserManager
 def get_workflow_data(workflow_file):
     nodes = {"WorkflowInput": {}, "WorkflowOutput": {}}
     # Extraire les nœuds WorkflowInput et WorkflowOutput
-    # print(workflow_file["nodes"]);
     for node in workflow_file["nodes"]:
         
         node_type = node.get("type")

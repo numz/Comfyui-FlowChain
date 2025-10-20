@@ -27,14 +27,13 @@ async function convertWorkflowToApiFormat(standardWorkflow) {
                 const originalGraph = app.graph;
                 
                 // Utiliser graphToPrompt en mode isolé
-                app.graph = tempGraph;             
+                // Instead of setting app.graph directly, we'll pass the tempGraph to graphToPrompt             
                 // Configurer sans déclencher de callbacks
                 tempGraph.configure(standardWorkflow);
                 
                 app.graphToPrompt(tempGraph)
                     .then(apiData => {
-                        // Restaurer le graphe original
-                        app.graph = originalGraph;
+                        // No need to restore app.graph since we didn't change it
                         
                         // Résoudre avec le format API
                         resolve(apiData.output);
@@ -89,7 +88,6 @@ export async function importWorkflow(root_obj, workflow_path, app){
     const filename = workflow_path.replace(/\\/g, '/').split("/");
     root_obj.title = "Workflow: "+filename[filename.length-1].replace(".json", "").replace(/_/g, " ");
     
-
     return api.fetchApi("/flowchain/workflow?workflow_path="+workflow_path)
         .then(response => response.json())
         .then(async data => {

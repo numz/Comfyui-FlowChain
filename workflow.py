@@ -354,39 +354,142 @@ class Workflow(SaveImage):
                                     if sub_output_node["inputs"]["Name"] == workflow_outputs[input_value[1]]["inputs"]["Name"]:
                                         workflow[node_id]["inputs"][input_name] = sub_output_node["inputs"]["default"]
 
-            # remove output node
-            subworkflow = {k: v for k, v in subworkflow.items() if not ("class_type" in v and v["class_type"] == "WorkflowOutput")}
-
             return workflow, subworkflow, do_not_delete
 
         def clean_workflow(workflow, inputs=None, kwargs_values=None):
+            # Ensure workflow is a dict (not a raw JSON string)
+            if isinstance(workflow, str):
+                try:
+                    workflow = json.loads(workflow)
+                except Exception:
+                    workflow = {}
             if kwargs_values is None:
                 kwargs_values = {}
             if inputs is None:
                 inputs = {}
             if inputs is not None:
                 workflow = populate_inputs(workflow, inputs, kwargs_values)
+            
+            # From here on, perform cleaning and return results
+            # Log current workflow for debugging
+            print(f"Workflow: {workflow}")
 
             workflow_outputs = {k: v for k, v in workflow.items() if "class_type" in v and v["class_type"] == "WorkflowOutput"}
 
-            for output_id, output_node in workflow_outputs.items():
+            # Keep UI nodes so we can still collect outputs; just hide them
+            for output_id, _output_node in workflow_outputs.items():
                 workflow[output_id]["inputs"]["ui"] = False
 
+            # Remove switch/continue structures and their dead branches
             workflow, switch_to_delete = treat_switch(workflow)
             workflow, continue_to_delete = treat_continue(workflow)
             workflow = recursive_delete(workflow, switch_to_delete + continue_to_delete)
+
+            # Recompute outputs after pruning just in case
+            workflow_outputs = {k: v for k, v in workflow.items() if "class_type" in v and v["class_type"] == "WorkflowOutput"}
             return workflow, workflow_outputs
 
         def get_recursive_workflow(workflow_name, workflows, max_id=0,do_not_delete = []):
-            # if workflows[-5:] == ".json":
-            #    workflow = get_workflow(workflows)
-            # else:
-            try:
-                if workflows == "{}":
-                    raise ValueError("Empty workflow.")
-                workflow = json.loads(workflows)
-            except:
-                raise RuntimeError(f"Error while loading workflow: {workflow_name}, See <a href='https://github.com/numz/Comfyui-FlowChain'> for more information.")
+            # Decide whether to load from file or parse JSON content
+            # If the provided workflows content is empty, use the selected workflow_name file
+            workflows_source = workflows
+            if workflows_source is None or (isinstance(workflows_source, str) and workflows_source.strip() in ("", "{}")):
+                workflows_source = workflow_name
+
+            # Check if workflows_source is a filename (contains .json) or JSON content
+            # A filename should be a simple path, not JSON content
+            is_filename = (
+                isinstance(workflows_source, str)
+                and workflows_source.endswith('.json')
+                and not workflows_source.startswith('{')
+                and not workflows_source.startswith('[')
+                and len(workflows_source) < 200
+            )
+
+            if is_filename:
+                # It's a filename, load the file content
+                workflow_file_path = os.path.join(folder_paths.user_directory, "default", "workflows", workflows_source)
+                if not os.path.exists(workflow_file_path):
+                    raise RuntimeError(f"Workflow file not found: {workflow_file_path}")
+                
+                try:
+                    with open(workflow_file_path, "r", encoding="utf-8") as f:
+                        workflow_data = json.load(f)
+                    
+                    # Convert from ComfyUI format to FlowChain format if needed
+                    if "nodes" in workflow_data:
+                        # Convert ComfyUI format to FlowChain format
+                        workflow = {}
+                        # Build a map of node_id -> ordered input names
+                        input_names_by_node = {}
+                        for node in workflow_data["nodes"]:
+                            input_names_by_node[str(node["id"])] = [i.get("name") for i in node.get("inputs", [])]
+                        for node in workflow_data["nodes"]:
+                            node_id = str(node["id"])
+                            workflow[node_id] = {
+                                "class_type": node["type"],
+                                "inputs": {}
+                            }
+
+                            # Map widget values positionally for inputs that have widgets and are not linked
+                            widget_values = node.get("widgets_values", [])
+                            widget_idx = 0
+                            for input_def in node.get("inputs", []):
+                                input_name = input_def["name"]
+                                has_widget = "widget" in input_def and input_def["widget"] is not None
+                                is_connected = input_def.get("link") is not None
+                                if has_widget:
+                                    if not is_connected:
+                                        if widget_idx < len(widget_values):
+                                            workflow[node_id]["inputs"][input_name] = widget_values[widget_idx]
+                                    # advance index regardless to keep alignment with widgets_values ordering
+                                    widget_idx += 1
+                    
+                    # Handle links between nodes - ComfyUI format
+                    if "links" in workflow_data:
+                        for link in workflow_data["links"]:
+                            # ComfyUI link format: [link_id, source_node, source_slot, target_node, target_slot, type]
+                            source_node = str(link[1])
+                            source_slot = int(link[2]) if isinstance(link[2], int) else 0
+                            target_node = str(link[3])
+                            target_slot = link[4]
+                            # Translate target slot index to the actual input name if needed
+                            if isinstance(target_slot, int):
+                                input_names = input_names_by_node.get(target_node, [])
+                                target_input_name = input_names[target_slot] if target_slot < len(input_names) else str(target_slot)
+                            else:
+                                target_input_name = target_slot
+
+                            if source_node in workflow and target_node in workflow:
+                                # Set connection as [source_node, source_slot]
+                                workflow[target_node]["inputs"][target_input_name] = [source_node, source_slot]
+                    
+                    # Add widget values for WorkflowInput and WorkflowOutput nodes
+                    for node in workflow_data.get("nodes", []):
+                        node_id = str(node["id"])
+                        if node["type"] in ["WorkflowInput", "WorkflowOutput"] and "widgets_values" in node:
+                            widget_values = node["widgets_values"]
+                            if node["type"] == "WorkflowInput":
+                                if len(widget_values) > 0:
+                                    workflow[node_id]["inputs"]["Name"] = widget_values[0]
+                            elif node["type"] == "WorkflowOutput":
+                                if len(widget_values) > 0:
+                                    workflow[node_id]["inputs"]["Name"] = widget_values[0]
+                    
+                except Exception as e:
+                    raise RuntimeError(f"Error while loading workflow file {workflow_file_path}: {str(e)}")
+            else:
+                # It's JSON content, parse it directly
+                try:
+                    if workflows_source == "{}" or workflows_source == "":
+                        raise ValueError("Empty workflow.")
+                    # If it's already a dict, keep as is
+                    if isinstance(workflows_source, dict):
+                        workflow = workflows_source
+                    else:
+                        workflow = json.loads(workflows_source)
+                except Exception as e:
+                    raise RuntimeError(f"Error while parsing workflow JSON: {str(e)}")
 
             workflow, max_id = redefine_id(workflow, max_id)
             sub_workflows = {k: v for k, v in workflow.items() if "class_type" in v and v["class_type"] == "Workflow"}
@@ -394,7 +497,7 @@ class Workflow(SaveImage):
             for key, sub_workflow_node in sub_workflows.items():
                 workflow_json = sub_workflow_node["inputs"]["workflow"]
                 sub_workflow_name = sub_workflow_node["inputs"]["workflows"]
-                subworkflow, max_id, do_not_delete = get_recursive_workflow(sub_workflow_name, workflow_json, max_id, do_not_delete)
+                subworkflow, max_id, do_not_delete = get_recursive_workflow(sub_workflow_name, sub_workflow_name, max_id, do_not_delete)
 
                 # get sub workflow file path
                 sub_workflow_file_path = os.path.join(folder_paths.user_directory, "default", "workflows", sub_workflow_name)
@@ -455,7 +558,17 @@ class Workflow(SaveImage):
             original_inputs = {}
         
         workflow, _, _ = get_recursive_workflow(workflows, workflow, 5000, [])
+        # Safety: ensure we have a dict workflow (not a raw string)
+        if isinstance(workflow, str):
+            try:
+                workflow = json.loads(workflow)
+            except Exception:
+                workflow = {}
+        print(f"Converted workflow has {len(workflow)} nodes")
+        print(f"Workflow node types: {[node.get('class_type', 'unknown') for node in workflow.values()]}")
+        
         workflow, workflow_outputs = clean_workflow(workflow, original_inputs, kwargs)
+        print(f"After cleaning: {len(workflow)} nodes, {len(workflow_outputs)} outputs")
         
         # Accéder au fichier JSON original pour obtenir les positions correctes
         workflow_file_path = os.path.join(folder_paths.user_directory, "default", "workflows", workflows)
@@ -513,9 +626,17 @@ class Workflow(SaveImage):
         simple_server = SimpleServer()
         executor = PromptExecutor(simple_server)
         
+        print(f"Executing workflow with {len(workflow)} nodes")
+        print(f"Workflow outputs to execute: {workflow_outputs_id}")
+        
         await executor.execute_async(workflow, prompt_id, {"client_id": client_id}, workflow_outputs_id)
 
         history_result = executor.history_result
+        print(f"Execution completed. History result keys: {list(history_result.keys())}")
+        if "outputs" in history_result:
+            print(f"Outputs: {list(history_result['outputs'].keys())}")
+            for output_id, output_data in history_result["outputs"].items():
+                print(f"Output {output_id}: {type(output_data.get('default', 'No default'))}")
         comfy.model_management.unload_all_models()
         gc.collect()
 

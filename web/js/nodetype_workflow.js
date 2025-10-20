@@ -101,37 +101,24 @@ function initialisation_preGraph(node) {
       } else if (app && app.lipsync_studio && app.lipsync_studio[value]) {
         try {
           let workflowJSON = await importWorkflow(node, value, app); // importWorkflow updates node.title
+          
+          // Check if importWorkflow returned false (error case)
+          if (workflowJSON === false) {
+            console.error(`Failed to import workflow: ${value}`);
+            node.title = "Workflow (FlowChain ⛓️)"; // Reset title on error
+            return;
+          }
+          
           workflowJSON = JSON.parse(workflowJSON);
           // Ensure app.lipsync_studio[value] (and its .inputs) is still valid after await
           if (app.lipsync_studio[value] && app.lipsync_studio[value].inputs) {
             const inputs = app.lipsync_studio[value].inputs;
-            const outputs = app.lipsync_studio[value].outputs;
-            for (let [key, value] of Object.entries(inputs)) {
-              if (
-                value["inputs"][2]?.values &&
-                value["inputs"][2].values.length > 0
-              ) {
-                workflowJSON[key]["inputs"]["type"] = "COMBO";
-              } else {
-                workflowJSON[key]["inputs"]["type"] = value["inputs"][1];
-              }
-            }
-            for (let [key, value] of Object.entries(outputs)) {
-              if (value["inputs"].length === undefined) {
-                workflowJSON[key]["inputs"]["type"] =
-                  value["inputs"].type.value;
-              } else {
-                workflowJSON[key]["inputs"]["type"] = value["inputs"][1];
-              }
-            }
-            workflowJSON = JSON.stringify(workflowJSON);
-
+            // We no longer mutate workflowJSON by numeric keys; IDs may differ after conversion
             if (node.widgets && node.widgets[1]) {
-              node.widgets[1].value = workflowJSON;
+              node.widgets[1].value = ""; // keep hidden field empty to avoid bloat
             }
-
-            addInputs(node, inputs, []); // Requires node.graph
-            addOutputs(node, value); // Requires node.graph
+            addInputs(node, inputs, node.widgets_values || []);
+            addOutputs(node, value);
             fitHeight(node);
           } else {
             console.error(
@@ -184,6 +171,7 @@ function initialisation_onAdded(node) {
         if (
           node.widgets[1] &&
           (node.widgets[1].value === "" ||
+            node.widgets[1].value === "false" ||
             typeof node.widgets[1].value !== "string" ||
             !node.widgets[1].value.startsWith("{"))
         ) {
@@ -245,9 +233,13 @@ function configure(info) {
     this.widgets &&
     this.widgets[1] &&
     info.widgets_values &&
-    info.widgets_values[1]
+    info.widgets_values[1] &&
+    info.widgets_values[1] !== "false"
   ) {
     this.widgets[1].value = info.widgets_values[1]; // Set the hidden workflow JSON
+  } else if (info.widgets_values && info.widgets_values[1] === "false") {
+    // If the stored value is "false", clear it and trigger re-import
+    this.widgets[1].value = "";
   }
 
   if (selectedWorkflowName === "None") {
@@ -296,20 +288,30 @@ function configure(info) {
             const outputs = app.lipsync_studio[selectedWorkflowName].outputs;
 
             for (let [key, value] of Object.entries(inputs)) {
-              data_json[key]["inputs"]["type"] = value["inputs"][1];
+              // Check if the key exists in data_json before accessing it
+              if (data_json[key] && data_json[key]["inputs"]) {
+                data_json[key]["inputs"]["type"] = value["inputs"][1];
+              } else {
+                console.warn(`Key '${key}' not found in data_json for inputs processing`);
+              }
             }
             for (let [key, value] of Object.entries(outputs)) {
-              if (value["inputs"].length === undefined) {
-                data_json[key]["inputs"]["type"] = value["inputs"].type.value;
-              } else {
-                if (
-                  value["inputs"][2]?.values &&
-                  value["inputs"][2].values.length > 0
-                ) {
-                  data_json[key]["inputs"]["type"] = "COMBO";
+              // Check if the key exists in data_json before accessing it
+              if (data_json[key] && data_json[key]["inputs"]) {
+                if (value["inputs"].length === undefined) {
+                  data_json[key]["inputs"]["type"] = value["inputs"].type.value;
                 } else {
-                  data_json[key]["inputs"]["type"] = value["inputs"][1];
+                  if (
+                    value["inputs"][2]?.values &&
+                    value["inputs"][2].values.length > 0
+                  ) {
+                    data_json[key]["inputs"]["type"] = "COMBO";
+                  } else {
+                    data_json[key]["inputs"]["type"] = value["inputs"][1];
+                  }
                 }
+              } else {
+                console.warn(`Key '${key}' not found in data_json for outputs processing`);
               }
             }
             this.widgets[1].value = JSON.stringify(data_json);
@@ -395,6 +397,12 @@ export function setupWorkflowNode(nodeType) {
     initialisation_preGraph(this); // Our graph-independent setup
 
     chainCallback(this, "onConfigure", configure);
-    chainCallback(this, "onSerialize", serialize);
+    chainCallback(this, "onSerialize", function(info){
+      // Ensure workflow_json is not persisted to avoid runaway nested JSON
+      if (info.widgets_values && info.widgets_values.length > 1) {
+        info.widgets_values[1] = "";
+      }
+      serialize.call(this, info);
+    });
   };
 }

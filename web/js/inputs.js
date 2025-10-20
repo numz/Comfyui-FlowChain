@@ -168,12 +168,14 @@ export function addInputs(node, inputs, widgets_values) {
     (input) => input.value !== undefined && input.value !== null
   );
   // replace value in widget_inputs with the value in widgets_values
-  if (widgets_values) {
+  if (widgets_values && widgets_values.length > 2) {
+    // widgets_values[0] = workflow name, widgets_values[1] = workflow JSON
+    // Input values start from index 2
     for (let i = 0; i < widget_inputs.length; i++) {
       const widget_input = widget_inputs[i];
       const widget_value = widgets_values[2 + i];
       //find name in mapped_input and replace value
-      if (widget_value)
+      if (widget_value !== undefined && widget_value !== null)
         for (let j = 0; j < mapped_input.length; j++)
           if (mapped_input[j].name == widget_input.name) {
             mapped_input[j].value = widget_value;
@@ -419,6 +421,35 @@ export function addInputs(node, inputs, widgets_values) {
     if (node.graph) {
       node.graph.setDirtyCanvas(true);
     }*/
+  }
+
+  // Update widgets_values array to reflect current widget values
+  if (node.widgets && node.widgets.length > 0) {
+    // Ensure widgets_values array exists and has correct length
+    if (!node.widgets_values) {
+      node.widgets_values = [];
+    }
+    
+    // Update widgets_values with current widget values
+    // widgets_values[0] = workflow name, widgets_values[1] = workflow JSON
+    // Input values start from index 2
+    for (let i = 0; i < node.widgets.length; i++) {
+      const widget = node.widgets[i];
+      const valueIndex = 2 + i;
+      
+      // Ensure the array is long enough
+      while (node.widgets_values.length <= valueIndex) {
+        node.widgets_values.push(undefined);
+      }
+      
+      // Update the value, but don't overwrite workflow JSON if it's "false"
+      if (valueIndex === 1 && widget.value === "false") {
+        // Don't update the workflow JSON if it's "false"
+        continue;
+      }
+      
+      node.widgets_values[valueIndex] = widget.value;
+    }
   }
 
   // Rafraîchir le canvas si nécessaire
